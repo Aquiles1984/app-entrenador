@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Entrenador SUB14</title>
+<title>S14A</title>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--ink:#16202a;--mut:#5d6b78;--line:#d9e0e6;--acc:#0b6b3a;--acc2:#e8f3ec;--warn:#b42318;--warnbg:#fdecea;--ok:#067647}
 @media (prefers-color-scheme:dark){:root{--bg:#10161b;--card:#18212a;--ink:#e8eef3;--mut:#93a1ae;--line:#2a3743;--acc:#3fbf7f;--acc2:#16301f;--warn:#ff8a80;--warnbg:#3a1a18;--ok:#5fd39a}}
@@ -198,7 +198,7 @@ button.lnk{background:none;border:0;padding:0;color:inherit;cursor:pointer;text-
 .grid2>*{min-width:0}
 .row select{min-width:0;max-width:100%}
 [data-slot]{flex:1;width:0}
-html,body{overflow-x:hidden}
+html,body{overflow-x:clip}
 .ptab td{padding:6px 4px}
 .ptab input,.ptab select{padding:7px 8px}
 .row.sm{display:none}
@@ -209,6 +209,14 @@ html,body{overflow-x:hidden}
 /* Navegación inferior (móvil) y pantallas de uso en directo */
 #bnav{display:none}
 #more{display:none}
+header h1{display:flex;align-items:center;gap:8px}
+header h1 .ver{font-size:12px;font-weight:500;opacity:.75}
+#hback{display:none;border:0;background:rgba(255,255,255,.18);color:#fff;width:34px;height:34px;border-radius:10px;font-size:24px;line-height:1;padding:0 0 3px;cursor:pointer}
+body.canback #hback{display:inline-flex;align-items:center;justify-content:center}
+.masg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(min-width:600px){.masg{grid-template-columns:repeat(4,1fr)}}
+.masg button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:14px 6px;font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:86px;box-shadow:var(--sh)}
+.masg button .i{font-size:26px}
 @media(max-width:899px){
  #tabs{display:none}
  #bnav{display:flex;position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;overflow:visible;gap:2px;z-index:25;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -4px 14px rgba(0,0,0,.08);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
@@ -223,7 +231,16 @@ html,body{overflow-x:hidden}
  header h1{font-size:17px}
  header .priv{display:none}
  .nav2{position:sticky;bottom:70px;background:var(--bg);padding:8px 0;z-index:6;margin:0 -2px}
- .t-sesiones .ph,.t-partido .ph{display:none}
+ .t-sesiones .ph,.t-partido .ph,.t-mas .ph{display:none}
+ body:has(#savebar.show) .nav2{bottom:142px}
+ #cdbar{padding:8px 10px;gap:6px}
+ #cdbar .t{font-size:32px;min-width:96px}
+ #cdbar .l{min-width:0;font-size:12px}
+ #cdbar button{padding:8px 10px}
+ body.cdon .nav2{bottom:200px}
+ body.cdon:has(#savebar.show) .nav2{bottom:272px}
+ body.cdon #savebar{bottom:200px}
+ body.cdon main{padding-bottom:230px}
 }
 #more.show{display:block;position:fixed;inset:0;z-index:35;background:rgba(0,0,0,.45)}
 #more .sh{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:18px 18px 0 0;padding:14px 14px calc(20px + env(safe-area-inset-bottom));max-height:80vh;overflow:auto}
@@ -289,7 +306,7 @@ header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!im
 </head>
 <body>
 <header>
-  <h1>Entrenador SUB14 A · v3.1</h1>
+  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.2</span></h1>
   <p class="priv">Datos de menores: se guardan solo en este dispositivo. No subir este archivo ni las copias de seguridad a ningún servicio.</p>
 </header>
 <nav id="tabs"></nav>
@@ -658,7 +675,7 @@ function clock(t){var m=Math.floor(t/60),s=t%60;return (m<10?'0':'')+m+':'+(s<10
 function histMin(id){var t=0;S.hist.forEach(function(h){t+=(h.secs&&h.secs[id])||0;});return t;}
 function opts(list,sel){return list.map(function(v){return '<option'+(v===sel?' selected':'')+'>'+esc(v)+'</option>';}).join('');}
 
-var ICON={inicio:'🏠',plantilla:'👥',pizarra:'📋',partido:'⏱️',plan:'🗓️',sesiones:'📝',pi:'⭐',tecnica:'🧠',coord:'🪜',cohe:'🤝',reglas:'⚖️',bib:'📚',prev:'💪',abp:'🎯',videos:'▶️',fichas:'🧾',normas:'📜',mensajes:'✉️',nutri:'🥗',pendientes:'✅',ayuda:'❓'};
+var ICON={inicio:'🏠',plantilla:'👥',pizarra:'📋',partido:'⏱️',plan:'🗓️',sesiones:'📝',pi:'⭐',tecnica:'🧠',coord:'🏃',cohe:'🤝',reglas:'⚖️',bib:'📚',prev:'💪',abp:'🎯',videos:'▶️',fichas:'🧾',normas:'📜',mensajes:'✉️',nutri:'🥗',pendientes:'✅',ayuda:'❓',mas:'☰'};
 var TABS=[['inicio','Inicio'],['plantilla','Plantilla'],['pizarra','Pizarra'],['partido','Partido'],['plan','Planificación'],['sesiones','Sesiones'],['pi','Programa individual'],['tecnica','Técnica y táctica'],['coord','Coordinación'],['prev','Prevención'],['abp','Balón parado'],['cohe','Cohesión y ánimo'],['reglas','Reglamento'],['bib','Biblioteca'],['videos','Vídeos'],['fichas','Fichas'],['normas','Normas'],['mensajes','Mensajes'],['nutri','Nutrición'],['pendientes','Pendientes'],['ayuda','Ayuda']];
 var GCAMPO=['inicio','partido','pizarra','plantilla','sesiones','plan','fichas','pi','pendientes'];
 function renderTabs(){
@@ -671,8 +688,26 @@ function renderTabs(){
   var BN=[['inicio','🏠','Inicio'],['sesiones','📝','Sesión'],['partido','⏱️','Partido'],['pizarra','📋','Pizarra']];
   var enBN=BN.some(function(x){return x[0]===S.tab;});
   $('#bnav').innerHTML=BN.map(function(x){return '<button data-tab="'+x[0]+'" class="'+(S.tab===x[0]?'on':'')+'"><span class="i">'+x[1]+'</span>'+x[2]+'</button>';}).join('')+
-   '<button data-act="more" class="'+(enBN?'':'on')+'"><span class="i">☰</span>'+(enBN?'Más':esc(tn[S.tab]||'Más'))+'</button>';
+   '<button data-tab="mas" class="'+(enBN?'':'on')+'"><span class="i">☰</span>'+(enBN||S.tab==='mas'?'Más':esc(tn[S.tab]||'Más'))+'</button>';
+  document.body.classList.toggle('canback',S.tab!=='inicio');
 }
+function vMas(){
+  var tn={};TABS.forEach(function(t){tn[t[0]]=t[1];});
+  var c1=GCAMPO.filter(function(k){return ['inicio','sesiones','partido','pizarra'].indexOf(k)<0;});
+  var c2=TABS.map(function(t){return t[0];}).filter(function(k){return GCAMPO.indexOf(k)<0;});
+  function g(ks){return '<div class="masg">'+ks.map(function(k){return '<button data-tab="'+k+'"><span class="i">'+(ICON[k]||'')+'</span>'+esc(tn[k])+'</button>';}).join('')+'</div>';}
+  return '<h3 style="margin:4px 2px 10px">Campo</h3>'+g(c1)+'<h3 style="margin:18px 2px 10px">Consulta</h3>'+g(c2);
+}
+/* Botón de atrás: historial propio para que el «atrás» del móvil no cierre la app */
+function navState(){return {tab:S.tab,sesv:S.sesv||null,sstep:S.sstep||0};}
+function pushNav(){try{history.pushState(navState(),'','#'+S.tab);}catch(e){}}
+window.addEventListener('popstate',function(e){
+  var st=e.state;
+  if(DIRTY){try{history.pushState(navState(),'','#'+S.tab);}catch(x){}canLeave();return;}
+  if(!st){st={tab:'inicio'};}
+  S.tab=st.tab||'inicio';if(st.sesv!==undefined)S.sesv=st.sesv;if(st.sstep!==undefined)S.sstep=st.sstep;
+  save();render();window.scrollTo(0,0);
+});
 function showMore(){
   var tn={};TABS.forEach(function(t){tn[t[0]]=t[1];});
   var c1=GCAMPO.filter(function(k){return ['inicio','sesiones','partido','pizarra'].indexOf(k)<0;});
@@ -705,13 +740,14 @@ function render(){
   else if(S.tab==='normas')v.innerHTML=vNormas();
   else if(S.tab==='mensajes')v.innerHTML=vMensajes();
   else if(S.tab==='ayuda')v.innerHTML=vAyuda();
+  else if(S.tab==='mas')v.innerHTML=vMas();
   else v.innerHTML=vPend();
   if(S.tab!=='inicio')pageHead(v);
   if(['inicio','partido','pizarra','plantilla','sesiones','fichas','pi'].indexOf(S.tab)<0)accordionize(v);
 }
-var TABSUB={ayuda:'Cómo usar la app, por prioridades. Se actualiza con cada versión.',plantilla:'Los 18 jugadores: posiciones, perfil, pie y minutos.',pizarra:'Sistema, once y roles de balón parado.',partido:'Convocatoria, once inicial, minutos y cambios en directo.',plan:'Fases de la temporada, semana tipo y reparto de contenidos.',sesiones:'Ficha de la sesión, pase de lista, semáforo y cuenta atrás.',pi:'Prioridades, plan y tests de cada jugador.',fichas:'Seguimiento individual: objetivos y entrevistas.',pendientes:'Lo que queda por hacer, por bloques.',tecnica:'Conceptos para entender y enseñar, con diagramas.',coord:'Ejercicios de coordinación para la activación.',prev:'Fuerza, prevención y actuación ante golpes.',abp:'Jugadas de estrategia para atacar y defender.',cohe:'Grupo, ánimo y equipos mixtos.',reglas:'Reglamento y gestión del partido.',bib:'Investigación por temas, con fuentes y límites.',videos:'Vídeos de referencia por ejercicio.',normas:'Normas del equipo y capitanía.',mensajes:'Plantillas de mensajes para familias y club.',nutri:'Alimentación, hidratación y descanso.'};
+var TABSUB={mas:'Todas las demás pestañas.',ayuda:'Cómo usar la app, por prioridades. Se actualiza con cada versión.',plantilla:'Los 18 jugadores: posiciones, perfil, pie y minutos.',pizarra:'Sistema, once y roles de balón parado.',partido:'Convocatoria, once inicial, minutos y cambios en directo.',plan:'Fases de la temporada, semana tipo y reparto de contenidos.',sesiones:'Ficha de la sesión, pase de lista, semáforo y cuenta atrás.',pi:'Prioridades, plan y tests de cada jugador.',fichas:'Seguimiento individual: objetivos y entrevistas.',pendientes:'Lo que queda por hacer, por bloques.',tecnica:'Conceptos para entender y enseñar, con diagramas.',coord:'Ejercicios de coordinación para la activación.',prev:'Fuerza, prevención y actuación ante golpes.',abp:'Jugadas de estrategia para atacar y defender.',cohe:'Grupo, ánimo y equipos mixtos.',reglas:'Reglamento y gestión del partido.',bib:'Investigación por temas, con fuentes y límites.',videos:'Vídeos de referencia por ejercicio.',normas:'Normas del equipo y capitanía.',mensajes:'Plantillas de mensajes para familias y club.',nutri:'Alimentación, hidratación y descanso.'};
 function pageHead(v){
-  var tn='';TABS.forEach(function(t){if(t[0]===S.tab)tn=t[1];});
+  var tn=S.tab==='mas'?'Más':'';TABS.forEach(function(t){if(t[0]===S.tab)tn=t[1];});
   var sub=TABSUB[S.tab]||'';
   var first=v.firstElementChild;
   if(first&&first.classList.contains('card')&&!first.classList.contains('keep')&&first.children.length<=2){
@@ -1023,7 +1059,7 @@ if(S.match.running&&Date.now()-(S.match.lastTs||0)>600000){S.match.running=false
 
 /* ---------- Sesiones ---------- */
 /* ---------- Ayuda: se genera desde GUIA_USUARIO.md (lo incrusta construir_publico.py; no editar a mano) ---------- */
-var GUIA_MD=/*GUIA*/"# Guía de usuario · App Entrenador SUB14\n\nOrdenada por prioridad: empieza por arriba y baja solo cuando lo necesites.\n\n- **Dirección:** https://aquiles1984.github.io/app-entrenador/ (instalada en el móvil con el icono del escudo).\n- **Tus datos** se guardan solo en tu móvil. No hay servidor ni nube.\n\n---\n\n## Reglas básicas (léelas una vez)\n\n1. **Abajo** tienes la barra: **Inicio · Sesión · Partido · Pizarra · Más**. «Más» abre el resto de pestañas.\n2. **Cuando cambias algo**, sale abajo la barra negra **«Cambios sin guardar» › Guardar / Cancelar**. Hasta que no pulsas Guardar, no se guarda. No te deja cambiar de pestaña sin guardar o cancelar.\n3. **Lo único que se guarda solo** es el partido una vez empezado (minutos, cambios) y la cuenta atrás.\n4. **Copia de seguridad, una vez a la semana:** Más › Plantilla › **«Copiar como texto»** y pégalo en tu WhatsApp. Si cambias o pierdes el móvil, es lo que te salva.\n\n---\n\n## PRIORIDAD 1 · Lo que usarás cada día\n\n### Sesión (entreno)\nArriba eliges el **día** tocando una ficha de fecha. Debajo, tres pasos:\n\n| Paso | Cuándo | Qué haces |\n|---|---|---|\n| **Antes** | La noche anterior | Lees objetivo, material y la lista de tareas. «Ficha completa» para imprimir. |\n| **En el campo** | Durante el entreno | 1) **Pase de lista** y **semáforo** › Guardar. 2) **Empezar ▶** y vas **tarea a tarea**: diagrama, claves y **cuenta atrás**. 3) **Siguiente ▶** hasta el final. |\n| **Después** | Al acabar | **Esfuerzo del grupo** (toca 1-10), **minutos reales**, y **cada jugador** con un toque (1 flojo, 2 bien, 3 muy bien) › Guardar. |\n\n- Si la sesión es **hoy**, se abre directamente en «En el campo».\n- **Pase de lista:** Presente, Justificada o Falta. «Marcar el resto como presentes» te ahorra toques.\n- **Semáforo:** Bien, Molestia o Dolor (rodilla, talón…). Con molestia: menos saltos y esprints. Con dolor: sin impactos y avisar a la familia.\n- **Cuenta atrás:** sale abajo en grande, vibra y pita al acabar. Tienes también botones de **agua** de 1', 2' y 3'.\n\n### Partido\n| Momento | Qué haces |\n|---|---|\n| **Antes** | **Convocatoria** (toca a cada jugador o «Convocar a todos»), **once inicial** (toca a los 11) y **▶ Empezar el partido**. La **cronología T-90** te dice qué hacer y cuándo en la previa. |\n| **Durante** | **Pausar / Reanudar**, **Fin de la 1ª parte** y **2ª parte**. **Cambios:** «Abrir ventana», tocas al que **sale** (se marca en dorado) y luego al que **entra**. Contador de ventanas **0/3**. |\n| **Siempre visible** | Alerta **roja «Sin minutos»**: en Infantil S14 **todos los convocados deben jugar**. Se vuelve verde cuando todos han jugado. |\n| **Al acabar** | Resultado, **evaluación** (defensa, salida de balón, finalización) y **mensaje** listo para copiar: uno para las **familias** (sin minutos por jugador) y otro para el **coordinador** (con detalle). «Guardar al historial». |\n\n- **Golpe en la cabeza:** desplegable «🚑» en Partido: fuera del campo y no vuelve ese día, señales para llamar al 112 y botón de llamada.\n\n---\n\n## PRIORIDAD 2 · Lo que usarás cada semana\n\n### Crear los entrenos (Sesión › «+ Nueva»)\n1. Propone el siguiente día de entreno (saltándose los partidos) y el campo según el día.\n2. Elige la **idea de la semana** y escribe el **objetivo**.\n3. **«✨ Proponer sesión»** te monta activación, técnica, juego reducido y situación de partido.\n4. Ajusta: **«+ Añadir del banco»** (unas 40 tareas con diagrama; filtras por tipo y salen primero, con ⭐, las de la idea de la semana), **«+ Tarea libre»**, ▲▼ para ordenar y ✕ para quitar. Controla el **total de minutos** (75).\n5. **Guardar.**\n- **Repetir una sesión:** ábrela › Antes › **«📄 Duplicar para otro día»**.\n\n### Pizarra\n- Elige el **sistema** (4-2-3-1, 4-1-4-1, 4-4-2…). En cada puesto salen primero los jugadores que **encajan** por posición; los demás, como «excepción».\n- Arrastra los jugadores en el campo.\n- Debajo: **equilibrio del once** (perfiles) y **roles de balón parado** (lanzadores, barrera, rematadores, cierre de contra).\n\n### Más › Planificación\n- La **semana tipo** (lunes, martes, jueves), las fases de la temporada y el reparto de trabajo (poco analítico, mucho juego).\n\n---\n\n## PRIORIDAD 3 · De vez en cuando\n\n| Pestaña (en «Más») | Para qué |\n|---|---|\n| **Plantilla** | Nombres, dorsales, posición principal y secundaria, pie y minutos. Toca el título de una columna para **ordenar** (▲▼). Bajo cada nombre, **«Elegir perfil ▾»** (aéreo, salida de balón, velocidad…). Aquí también están las **copias de seguridad**. |\n| **Fichas** | Seguimiento de cada jugador: objetivos, entrevistas, pase de lista y semáforo. |\n| **Programa individual** | Prioridades, plan y tests de cada jugador. |\n| **Pendientes** | Lo que te queda por hacer (club, material…). |\n| **Mensajes** | Plantillas para familias y club: rellenas los datos y copias. |\n\n---\n\n## PRIORIDAD 4 · Consulta (cuando tengas tiempo)\n\nTodas con los textos en **desplegables cerrados** y «Abrir todo» arriba.\n\n| Pestaña | Qué hay |\n|---|---|\n| **Técnica y táctica** | Cobertura, basculación, permutas, transiciones, disparo, desmarques… con diagramas y ejercicios. |\n| **Coordinación** | Ejercicios para la activación. |\n| **Prevención** | Fuerza en Infantil (qué sí y qué no), isométricos con dosis y golpe en la cabeza. |\n| **Balón parado** | Córners, faltas y saques, en ataque y en defensa. |\n| **Cohesión y ánimo** | Grupitos, equipos mixtos y termómetro del ánimo. |\n| **Normas** | Normas del equipo y capitanía rotativa. |\n| **Reglamento** | Reglas FCF de Infantil S14 y gestión del partido. |\n| **Biblioteca** | Los 10 temas investigados, con conclusión, recomendaciones y fuentes. |\n| **Vídeos** y **Nutrición** | Referencias y consejos para las familias. |\n| **Ayuda** | Esta guía. Se actualiza sola con cada versión de la app. |\n\n---\n\n## Preguntas rápidas\n\n- **No me deja cambiar de pestaña.** Tienes cambios sin guardar: pulsa **Guardar** o **Cancelar** en la barra negra.\n- **He cambiado de móvil o he reinstalado la app.** Más › Plantilla › pega la copia de WhatsApp en «Pega aquí la copia…» › **Importar**.\n- **Quiero ver los datos en el PC.** En el móvil, «Copiar como texto» › WhatsApp. En el PC, abre la misma dirección, pega la copia › **Importar** (o **Fusionar** si ya tienes datos).\n- **La app no se actualiza.** Ciérrala del todo y ábrela otra vez. Si sigue igual, ábrela una vez en Chrome con la dirección y vuelve al icono.\n- **Sin cobertura en el campo.** Funciona igual: todo se guarda en el móvil.\n"/*FINGUIA*/;
+var GUIA_MD=/*GUIA*/"# Guía de usuario · App Entrenador SUB14\n\nOrdenada por prioridad: empieza por arriba y baja solo cuando lo necesites.\n\n- **Dirección:** https://aquiles1984.github.io/app-entrenador/ (instalada en el móvil como **S14A**, con el icono del escudo).\n- **Tus datos** se guardan solo en tu móvil. No hay servidor ni nube.\n\n---\n\n## Reglas básicas (léelas una vez)\n\n1. **Abajo** tienes la barra: **Inicio · Sesión · Partido · Pizarra · Más**. «Más» es una pantalla con el resto de pestañas.\n2. **Atrás:** el botón **‹** de arriba a la izquierda, o el de atrás del móvil, te lleva a la pantalla anterior (también paso a paso en «En el campo»). Desde Inicio, el de atrás del móvil sale de la app.\n3. **Cuando cambias algo**, sale abajo la barra negra **«Cambios sin guardar» › Guardar / Cancelar**. Hasta que no pulsas Guardar, no se guarda. No te deja cambiar de pestaña sin guardar o cancelar.\n4. **Lo único que se guarda solo** es el partido una vez empezado (minutos, cambios) y la cuenta atrás.\n5. **Copia de seguridad, una vez a la semana:** Más › Plantilla › **«Copiar como texto»** y pégalo en tu WhatsApp. Si cambias o pierdes el móvil, es lo que te salva.\n\n---\n\n## PRIORIDAD 1 · Lo que usarás cada día\n\n### Sesión (entreno)\nArriba eliges el **día** tocando una ficha de fecha. Debajo, tres pasos:\n\n| Paso | Cuándo | Qué haces |\n|---|---|---|\n| **Antes** | La noche anterior | Lees objetivo, material y la lista de tareas. «Ficha completa» para imprimir. |\n| **En el campo** | Durante el entreno | 1) **Pase de lista** y **semáforo** › Guardar. 2) **Empezar ▶** y vas **tarea a tarea**: diagrama, claves y **cuenta atrás**. 3) **Siguiente ▶** hasta el final. |\n| **Después** | Al acabar | **Esfuerzo del grupo** (toca 1-10), **minutos reales**, y **cada jugador** con un toque (1 flojo, 2 bien, 3 muy bien) › Guardar. |\n\n- Si la sesión es **hoy**, se abre directamente en «En el campo».\n- **Pase de lista:** Presente, Justificada o Falta. «Marcar el resto como presentes» te ahorra toques.\n- **Semáforo:** Bien, Molestia o Dolor (rodilla, talón…). Con molestia: menos saltos y esprints. Con dolor: sin impactos y avisar a la familia.\n- **Cuenta atrás:** sale abajo en grande, vibra y pita al acabar. Tienes también botones de **agua** de 1', 2' y 3'.\n\n### Partido\n| Momento | Qué haces |\n|---|---|\n| **Antes** | **Convocatoria** (toca a cada jugador o «Convocar a todos»), **once inicial** (toca a los 11) y **▶ Empezar el partido**. La **cronología T-90** te dice qué hacer y cuándo en la previa. |\n| **Durante** | **Pausar / Reanudar**, **Fin de la 1ª parte** y **2ª parte**. **Cambios:** «Abrir ventana», tocas al que **sale** (se marca en dorado) y luego al que **entra**. Contador de ventanas **0/3**. |\n| **Siempre visible** | Alerta **roja «Sin minutos»**: en Infantil S14 **todos los convocados deben jugar**. Se vuelve verde cuando todos han jugado. |\n| **Al acabar** | Resultado, **evaluación** (defensa, salida de balón, finalización) y **mensaje** listo para copiar: uno para las **familias** (sin minutos por jugador) y otro para el **coordinador** (con detalle). «Guardar al historial». |\n\n- **Golpe en la cabeza:** desplegable «🚑» en Partido: fuera del campo y no vuelve ese día, señales para llamar al 112 y botón de llamada.\n\n---\n\n## PRIORIDAD 2 · Lo que usarás cada semana\n\n### Crear los entrenos (Sesión › «+ Nueva»)\n1. Propone el siguiente día de entreno (saltándose los partidos) y el campo según el día.\n2. Elige la **idea de la semana** y escribe el **objetivo**.\n3. **«✨ Proponer sesión»** te monta activación, técnica, juego reducido y situación de partido.\n4. Ajusta: **«+ Añadir del banco»** (unas 40 tareas con diagrama; filtras por tipo y salen primero, con ⭐, las de la idea de la semana), **«+ Tarea libre»**, ▲▼ para ordenar y ✕ para quitar. Controla el **total de minutos** (75).\n5. **Guardar.**\n- **Repetir una sesión:** ábrela › Antes › **«📄 Duplicar para otro día»**.\n\n### Pizarra\n- Elige el **sistema** (4-2-3-1, 4-1-4-1, 4-4-2…). En cada puesto salen primero los jugadores que **encajan** por posición; los demás, como «excepción».\n- Arrastra los jugadores en el campo.\n- Debajo: **equilibrio del once** (perfiles) y **roles de balón parado** (lanzadores, barrera, rematadores, cierre de contra).\n\n### Más › Planificación\n- La **semana tipo** (lunes, martes, jueves), las fases de la temporada y el reparto de trabajo (poco analítico, mucho juego).\n\n---\n\n## PRIORIDAD 3 · De vez en cuando\n\n| Pestaña (en «Más») | Para qué |\n|---|---|\n| **Plantilla** | Nombres, dorsales, posición principal y secundaria, pie y minutos. Toca el título de una columna para **ordenar** (▲▼). Bajo cada nombre, **«Elegir perfil ▾»** (aéreo, salida de balón, velocidad…). Aquí también están las **copias de seguridad**. |\n| **Fichas** | Seguimiento de cada jugador: objetivos, entrevistas, pase de lista y semáforo. |\n| **Programa individual** | Prioridades, plan y tests de cada jugador. |\n| **Pendientes** | Lo que te queda por hacer (club, material…). |\n| **Mensajes** | Plantillas para familias y club: rellenas los datos y copias. |\n\n---\n\n## PRIORIDAD 4 · Consulta (cuando tengas tiempo)\n\nTodas con los textos en **desplegables cerrados** y «Abrir todo» arriba.\n\n| Pestaña | Qué hay |\n|---|---|\n| **Técnica y táctica** | Cobertura, basculación, permutas, transiciones, disparo, desmarques… con diagramas y ejercicios. |\n| **Coordinación** | Ejercicios para la activación. |\n| **Prevención** | Fuerza en Infantil (qué sí y qué no), isométricos con dosis y golpe en la cabeza. |\n| **Balón parado** | Córners, faltas y saques, en ataque y en defensa. |\n| **Cohesión y ánimo** | Grupitos, equipos mixtos y termómetro del ánimo. |\n| **Normas** | Normas del equipo y capitanía rotativa. |\n| **Reglamento** | Reglas FCF de Infantil S14 y gestión del partido. |\n| **Biblioteca** | Los 10 temas investigados, con conclusión, recomendaciones y fuentes. |\n| **Vídeos** y **Nutrición** | Referencias y consejos para las familias. |\n| **Ayuda** | Esta guía. Se actualiza sola con cada versión de la app. |\n\n---\n\n## Preguntas rápidas\n\n- **No me deja cambiar de pestaña.** Tienes cambios sin guardar: pulsa **Guardar** o **Cancelar** en la barra negra.\n- **He cambiado de móvil o he reinstalado la app.** Más › Plantilla › pega la copia de WhatsApp en «Pega aquí la copia…» › **Importar**.\n- **Quiero ver los datos en el PC.** En el móvil, «Copiar como texto» › WhatsApp. En el PC, abre la misma dirección, pega la copia › **Importar** (o **Fusionar** si ya tienes datos).\n- **La app no se actualiza.** Ciérrala del todo y ábrela otra vez. Si sigue igual, ábrela una vez en Chrome con la dirección y vuelve al icono.\n- **Sin cobertura en el campo.** Funciona igual: todo se guarda en el móvil.\n"/*FINGUIA*/;
 function mdInline(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g,'<a class="lk" href="$2" target="_blank" rel="noopener">$1</a>').replace(/(^|[\s(])(https?:\/\/[^\s)]+)/g,'$1<a class="lk" href="$2" target="_blank" rel="noopener">$2</a>');}
 function mdToHtml(md){
   var L=String(md||'').split(/\r?\n/),out=[],card=null,list=null,tbl=null,intro=[];
@@ -2374,7 +2410,7 @@ document.addEventListener('click',function(e){
   }
   var t=e.target.closest('[data-tab]');
   if(e.target.id==='more'){hideMore();return;}
-  if(t){if(t.getAttribute('data-tab')!==S.tab&&!canLeave())return;hideMore();S.tab=t.getAttribute('data-tab');save();render();window.scrollTo(0,0);return;}
+  if(t){var nt=t.getAttribute('data-tab');if(nt===S.tab)return;if(!canLeave())return;hideMore();S.tab=nt;save();pushNav();render();window.scrollTo(0,0);return;}
   var b=e.target.closest('[data-act]');if(!b)return;
   var a=b.getAttribute('data-act'),m=S.match;
   if(a==='export'){
@@ -2399,6 +2435,7 @@ document.addEventListener('click',function(e){
   else if(a==='tstadd'){var tv=($('#tv')||{}).value;if(tv==='')return;PI(S.pid).tests.push({f:($('#tf')||{}).value||today(),t:parseInt(($('#tt')||{}).value,10)||0,v:tv});save();render();}
   else if(a==='tstdel'){PI(S.pid).tests.splice(parseInt(b.getAttribute('data-i'),10),1);save();render();}
   else if(a==='syncnow'){syncNow(false);}
+  else if(a==='back'){if(!canLeave())return;history.back();}
   else if(a==='msnew'){if(!canLeave())return;beginEdit();newUserSession();S.tab='sesiones';bankOpen=false;save();render();window.scrollTo(0,0);toast('Sesión nueva: elige las tareas y pulsa Guardar','info');}
   else if(a==='msdup'){if(!canLeave())return;beginEdit();newUserSession(parseInt(b.getAttribute('data-i'),10));bankOpen=false;save();render();window.scrollTo(0,0);toast('Copia creada: cambia lo que quieras y pulsa Guardar','info');}
   else if(a==='msdel'){var ud=curUser();if(ud&&confirm('¿Borrar esta sesión?')){beginEdit();ud.del=true;S.ses=0;S.sesv='antes';save();render();}}
@@ -2410,9 +2447,9 @@ document.addEventListener('click',function(e){
   else if(a==='mtmv'){var um=curUser(),mk=parseInt(b.getAttribute('data-k'),10),md=parseInt(b.getAttribute('data-d'),10);if(um&&um.tareas[mk+md]){beginEdit();var tmp=um.tareas[mk];um.tareas[mk]=um.tareas[mk+md];um.tareas[mk+md]=tmp;save();render();}}
   else if(a==='mtdel'){var ux=curUser();if(ux){beginEdit();ux.tareas.splice(parseInt(b.getAttribute('data-k'),10),1);save();render();}}
   else if(a==='more'){if($('#more').className==='show')hideMore();else showMore();}
-  else if(a==='sesgo'){var si=parseInt(b.getAttribute('data-i'),10);if(si!==S.ses&&!canLeave())return;S.ses=si;S.attd=null;S.sstep=0;S.sesv=null;save();render();window.scrollTo(0,0);}
-  else if(a==='sesv'){var sv=b.getAttribute('data-v');if(sv!==S.sesv&&!canLeave())return;S.sesv=sv;save();render();window.scrollTo(0,0);}
-  else if(a==='sstep'){if(!canLeave())return;S.sstep=parseInt(b.getAttribute('data-v'),10)||0;save();render();window.scrollTo(0,0);}
+  else if(a==='sesgo'){var si=parseInt(b.getAttribute('data-i'),10);if(si!==S.ses&&!canLeave())return;S.ses=si;S.attd=null;S.sstep=0;S.sesv=null;save();pushNav();render();window.scrollTo(0,0);}
+  else if(a==='sesv'){var sv=b.getAttribute('data-v');if(sv!==S.sesv&&!canLeave())return;S.sesv=sv;save();pushNav();render();window.scrollTo(0,0);}
+  else if(a==='sstep'){if(!canLeave())return;S.sstep=parseInt(b.getAttribute('data-v'),10)||0;save();pushNav();render();window.scrollTo(0,0);}
   else if(a==='rpeq'){beginEdit();S.rpe=S.rpe||{};S.rpe[S.ses]=S.rpe[S.ses]||{};var rv=b.getAttribute('data-v');S.rpe[S.ses].r=(S.rpe[S.ses].r===rv?'':rv);save();render();}
   else if(a==='obsq'){beginEdit();S.obs[S.ses]=S.obs[S.ses]||{};var oid=b.getAttribute('data-id'),ov=b.getAttribute('data-v');var orr=S.obs[S.ses][oid]=S.obs[S.ses][oid]||{};orr.e=(String(orr.e)===ov?'':ov);orr.as=true;save();render();}
   else if(a==='obsx'){var xid=b.getAttribute('data-id');obsOpen[xid]=!obsOpen[xid];render();}
@@ -2440,8 +2477,8 @@ document.addEventListener('click',function(e){
   else if(a==='histdel'){if(confirm('¿Quitar este partido del historial de minutos?')){S.hist.splice(parseInt(b.getAttribute('data-i'),10),1);save();render();}}
   else if(a==='rpex'){beginEdit();if(S.rpe)delete S.rpe[b.getAttribute('data-k')];save();render();}
   else if(a==='rpesave'){if(DIRTY){saveAll();return;}save();var gb=b;gb.textContent='Guardado ✓';setTimeout(function(){gb.textContent='Guardar';},1500);}
-  else if(a==='go'){if(!canLeave())return;S.tab=b.getAttribute('data-go');save();render();window.scrollTo(0,0);}
-  else if(a==='gos'){if(!canLeave())return;S.ses=parseInt(b.getAttribute('data-i'),10);S.tab='sesiones';save();render();window.scrollTo(0,0);}
+  else if(a==='go'){if(!canLeave())return;S.tab=b.getAttribute('data-go');save();pushNav();render();window.scrollTo(0,0);}
+  else if(a==='gos'){if(!canLeave())return;S.ses=parseInt(b.getAttribute('data-i'),10);S.tab='sesiones';save();pushNav();render();window.scrollTo(0,0);}
   else if(a==='fopen'){if(!canLeave())return;S.fid=parseInt(b.getAttribute('data-id'),10);save();render();window.scrollTo(0,0);}
   else if(a==='saveall'){var ae=document.activeElement;if(ae&&ae.blur&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName))ae.blur();setTimeout(saveAll,0);}
   else if(a==='cancelall'){cancelAll();}
@@ -2537,6 +2574,8 @@ document.addEventListener('pointermove',dragMove);
 document.addEventListener('pointerup',dragEnd);
 window.addEventListener('resize',function(){if(S.tab==='pizarra')drawBoard();});
 (function(){var n=P(6);if(!S.m1){if(n&&n.foot==='?'){n.foot='Z';n.note='Zurdo confirmado: opción de central o lateral izquierdo';}S.m1=1;save();}})();
+/* Al abrir, Inicio queda debajo en el historial: «atrás» vuelve a Inicio antes de salir de la app */
+try{if(S.tab==='mas')S.tab='inicio';history.replaceState({tab:'inicio',sesv:S.sesv||null,sstep:S.sstep||0},'','#inicio');if(S.tab!=='inicio')history.pushState(navState(),'','#'+S.tab);}catch(e){}
 render();
 })();
 </script>
