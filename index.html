@@ -646,7 +646,7 @@ function isEditField(t){
 document.addEventListener('change',function(e){if(isEditField(e.target)){if(!DIRTY)SNAP=JSON.stringify(S);HOLD=true;setTimeout(function(){HOLD=false;},0);}},true);
 document.addEventListener('input',function(e){var t=e.target;if(isEditField(t)&&t.tagName!=='SELECT'&&!DIRTY){SNAP=JSON.stringify(S);markDirty();}},true);
 window.addEventListener('beforeunload',function(ev){if(DIRTY){ev.preventDefault();ev.returnValue='';}});
-function normS(){S.msg=S.msg||{};S.cap=S.cap||{hist:[],auto:{}};S.fic=S.fic||{};S.fa=S.fa||{};S.les=S.les||[];S.ae=S.ae||{};S.sg=S.sg||{};S.mood=S.mood||[];S.pi=S.pi||{};S.rpe=S.rpe||{};S.obs=S.obs||{};S.todo=S.todo||{};S.hist=S.hist||[];S.lineup=S.lineup||{form:'4-2-3-1',slots:[],pos:{}};S.match=S.match||newMatch();S._ts=S._ts||{};}
+function normS(){S.msg=S.msg||{};S.cap=S.cap||{hist:[],auto:{}};S.fic=S.fic||{};S.fa=S.fa||{};S.les=S.les||[];S.ae=S.ae||{};S.sg=S.sg||{};S.mood=S.mood||[];S.pi=S.pi||{};S.rpe=S.rpe||{};S.obs=S.obs||{};S.todo=S.todo||{};S.hist=S.hist||[];S.lineup=S.lineup||{form:'4-2-3-1',slots:[],pos:{}};S.match=S.match||newMatch();S._ts=S._ts||{};S.mises=S.mises||[];}
 function realSave(){try{S._ts=S._ts||{};var now=Date.now();Object.keys(S).forEach(function(k){if(NOSYNC[k])return;var j=JSON.stringify(S[k]);if(lastJ[k]!==j){lastJ[k]=j;S._ts[k]=now;}});localStorage.setItem(KEY,JSON.stringify(S));}catch(e){if(!saveWarned){saveWarned=true;alert('No se puede guardar en este navegador. Usa Exportar copia.');}}}
 function $(s,r){return (r||document).querySelector(s);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -682,6 +682,7 @@ function showMore(){
 }
 function hideMore(){var m=$('#more');m.className='';m.innerHTML='';}
 function render(){
+  syncUserSessions();
   renderTabs();
   var v=$('#view');v.className='t-'+S.tab;
   if(S.tab==='inicio')v.innerHTML=vInicio();
@@ -1020,15 +1021,98 @@ window.addEventListener('pagehide',function(){var ae=document.activeElement;if(a
 if(S.match.running&&Date.now()-(S.match.lastTs||0)>600000){S.match.running=false;}
 
 /* ---------- Sesiones ---------- */
+/* ---------- Creador de sesiones ---------- */
+var NBASE=null,bankF=null,bankOpen=false;
+var DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+var CAMPOS=['Campo entero','Medio campo','1/4 de campo'];
+var IDEAS=['Defender cerrados','Intensidad y comunicación','Presión tras pérdida','Salida de balón','Atacar abiertos','Desmarques y finalización','Transiciones','Balón parado','Cohesión y confianza'];
+var TIPOS=[['act','Activación'],['tec','Técnica'],['jr','Juego reducido'],['sit','Situación de partido']];
+function bankTipo(i,k){if(k===0)return 'act';var t=(TY[i]||[])[k]||{},a=t.A||0,g=t.G||0,s=t.S||0;return s>=g&&s>=a?'sit':(g>=a?'jr':'tec');}
+function bank(){
+  var b=[];for(var i=0;i<(NBASE||5);i++){var f=FICH[i];if(!f||f.user)continue;f.tareas.forEach(function(t,k){b.push({ref:'s'+i+'t'+k,i:i,k:k,t:t,tipo:bankTipo(i,k),ca:f.ca});});}
+  return b;
+}
+function bankGet(ref){var m=/^s(\d+)t(\d+)$/.exec(ref||'');if(!m)return null;var f=FICH[+m[1]];return f&&f.tareas[+m[2]]||null;}
+function parseMinT(t){var m=/(\d+)/.exec((t&&t.d)||'');return m?parseInt(m[1],10):0;}
+function isoToFe(iso){var p=String(iso||'').split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:'';}
+function userTask(x){
+  if(x.ref){var t=bankGet(x.ref);return t?t:null;}
+  return {t:x.t||'Tarea libre',d:(x.min||10)+"'",tt:x.tt||'',co:'',so:'',de:x.de||'',re:x.re||'-',dr:x.dr||'-',se:'-',ds:'-',vt:(x.min||10)+' min',es:x.es||'-',ob:x.ob||'',fig:[['f']]};
+}
+function syncUserSessions(){
+  if(NBASE===null)NBASE=SESIONES.length;
+  SESIONES.length=NBASE;Object.keys(FICH).forEach(function(k){if(+k>=NBASE)delete FICH[k];});
+  (S.mises||[]).forEach(function(u,n){
+    var idx=NBASE+n,d=u.fe?new Date(u.fe+'T00:00:00'):new Date(),fe=isoToFe(u.fe)||today().split('-').reverse().join('/');
+    var tareas=(u.tareas||[]).map(userTask).filter(function(t){return t;});
+    FICH[idx]={user:1,del:u.del,id:u.id,fe:fe,di:DIAS[d.getDay()],ca:u.ca||'Campo entero',mc:u.idea||'',ob:u.ob||u.idea||'',mat:u.mat||'Balones, conos, petos, porterías y agua.',jug:'',ini:'Idea de la semana: '+(u.idea||'—')+'. '+(u.ini||'Una sola idea, explicada en menos de un minuto.'),tareas:tareas,fin:u.fin||"8': balón parado y vuelta a la calma con estiramientos y mensaje final.",cont:[]};
+    SESIONES[idx]={t:(idx+1)+' · '+DIAS[d.getDay()].slice(0,3)+' '+fe.slice(0,5)+' · '+(u.ca||''),obj:u.ob||u.idea||'',b:tareas.map(function(t){return t.t+' ('+t.d+')';}),user:1,del:u.del};
+  });
+}
+function curUser(){var f=FICH[S.ses];if(!f||!f.user)return null;return (S.mises||[]).filter(function(u){return u.id===f.id;})[0]||null;}
+function nextTrainDate(){
+  var last=new Date();Object.keys(FICH).forEach(function(k){var f=FICH[k];if(f&&!f.del){var d=dparse(f.fe);if(d>last)last=d;}});
+  function iso(x){return x.getFullYear()+'-'+('0'+(x.getMonth()+1)).slice(-2)+'-'+('0'+x.getDate()).slice(-2);}
+  var partidos={};CALISO.forEach(function(c){partidos[c[0]]=1;});
+  var d=new Date(last.getFullYear(),last.getMonth(),last.getDate());
+  for(var j=0;j<21;j++){d.setDate(d.getDate()+1);var w=d.getDay();if((w===1||w===2||w===4)&&!partidos[iso(d)])break;}
+  return iso(d);
+}
+function campoPorDia(iso){var w=new Date(iso+'T00:00:00').getDay();return w===1?'Campo entero':(w===2?'1/4 de campo':'Medio campo');}
+function newUserSession(base){
+  S.mises=S.mises||[];var fe=nextTrainDate();
+  var u={id:'u'+Date.now(),fe:fe,ca:campoPorDia(fe),idea:IDEAS[0],ob:'',mat:'',tareas:[],fin:''};
+  if(base!==undefined&&FICH[base]){var fb=FICH[base];u.ca=fb.ca;u.idea=fb.mc||u.idea;u.ob=fb.ob;u.mat=fb.mat;u.fin=fb.fin;
+    if(fb.user){var ub=(S.mises||[]).filter(function(x){return x.id===fb.id;})[0];u.tareas=JSON.parse(JSON.stringify(ub?ub.tareas:[]));}
+    else u.tareas=fb.tareas.map(function(t,k){return {ref:'s'+base+'t'+k};});}
+  S.mises.push(u);syncUserSessions();S.ses=NBASE+S.mises.length-1;S.sesv='editar';S.sstep=0;
+}
+function proponer(u){
+  var b=bank(),usados={};(u.tareas||[]).forEach(function(x){if(x.ref)usados[x.ref]=1;});
+  var orden=['act','tec','jr','sit'];u.tareas=[];
+  orden.forEach(function(tp){var c=b.filter(function(x){return x.tipo===tp&&x.ca===u.ca;});if(!c.length)c=b.filter(function(x){return x.tipo===tp;});var el=c.filter(function(x){return !usados[x.ref];})[0]||c[0];if(el)u.tareas.push({ref:el.ref});});
+}
+function vSesEditar(i){
+  var u=curUser();if(!u)return '<div class="card"><p>Esta sesión no se puede editar. Usa «Duplicar» en Antes para hacer una copia tuya.</p></div>';
+  var tot=0,rows=(u.tareas||[]).map(function(x,k){var t=userTask(x);if(!t)return '';var mn=parseMinT(t);tot+=mn;
+    var tipo=x.ref?TIPOS.filter(function(z){var m=/^s(\d+)t(\d+)$/.exec(x.ref);return z[0]===bankTipo(+m[1],+m[2]);})[0]:null;
+    var h='<div class="tsum"><span class="n">'+(k+1)+'</span><div style="flex:1;min-width:0"><b>'+esc(t.t)+' · '+esc(t.d)+'</b><span class="note">'+(tipo?esc(tipo[1])+' · ':'Tarea libre · ')+esc(t.tt||t.de||'')+'</span></div>'+
+     '<span class="qn"><button data-act="mtmv" data-k="'+k+'" data-d="-1"'+(k===0?' disabled':'')+'>▲</button><button data-act="mtmv" data-k="'+k+'" data-d="1"'+(k===u.tareas.length-1?' disabled':'')+'>▼</button><button data-act="mtdel" data-k="'+k+'">✕</button></span></div>';
+    if(!x.ref)h+='<div class="row" style="padding:0 0 10px 42px"><input data-mt="t" data-k="'+k+'" value="'+esc(x.t||'')+'" placeholder="Nombre" style="flex:2;min-width:140px"><label class="note">Min <input type="number" data-mt="min" data-k="'+k+'" value="'+esc(x.min||10)+'" style="width:64px"></label><input data-mt="de" data-k="'+k+'" value="'+esc(x.de||'')+'" placeholder="Cómo se hace" style="flex:3;min-width:180px"></div>';
+    return h;}).join('');
+  var total=tot+3+8,col=total>80?'var(--warn)':(total<65?'var(--mut)':'var(--ok)');
+  var h='<div class="card"><h2>Datos de la sesión</h2><div class="fgrid">'+
+   '<label class="note">Fecha<input type="date" data-ms="fe" value="'+esc(u.fe)+'"></label>'+
+   '<label class="note">Campo<select data-ms="ca">'+opts(CAMPOS,u.ca)+'</select></label>'+
+   '<label class="note">Idea de la semana<select data-ms="idea">'+opts(IDEAS.indexOf(u.idea)<0&&u.idea?IDEAS.concat([u.idea]):IDEAS,u.idea)+'</select></label></div>'+
+   '<div class="row"><label class="note" style="flex:1">Objetivo (una frase)<input data-ms="ob" value="'+esc(u.ob||'')+'" placeholder="Ej. bloque junto y cobertura al lateral"></label></div>'+
+   '<div class="row"><label class="note" style="flex:1">Material<input data-ms="mat" value="'+esc(u.mat||'')+'" placeholder="Balones, conos, petos, 2 porterías…"></label></div></div>';
+  h+='<div class="card"><h2>Tareas</h2><p class="note" style="color:'+col+'"><b>Total: '+total+"' de 75'</b> (incluye 3' de charla y 8' de final)</p>"+(rows||'<p class="note">Sin tareas. Pulsa «Proponer» o añade del banco.</p>')+
+   '<div class="row" style="margin-top:10px"><button class="b" data-act="mtbank">+ Añadir del banco</button><button class="b s" data-act="mtfree">+ Tarea libre</button><button class="b s" data-act="mtprop">✨ Proponer sesión</button></div>'+(bankOpen?vBank(u):'')+'</div>';
+  h+='<div class="card"><h2>Final</h2><textarea data-ms="fin" rows="2" style="width:100%" placeholder="Balón parado y vuelta a la calma">'+esc(u.fin||'')+'</textarea></div>';
+  h+='<div class="row"><button class="b" data-act="sesv" data-v="antes" style="flex:1">Ver la sesión ▶</button><button class="b w" data-act="msdel">Borrar sesión</button></div>';
+  return h;
+}
+function vBank(u){
+  var b=bank(),f=bankF||'all';
+  var chips='<div class="chips" style="margin:10px 0">'+[['all','Todas']].concat(TIPOS).map(function(z){return '<button class="chip'+(f===z[0]?' on':'')+'" data-act="mtbf" data-v="'+z[0]+'">'+z[1]+'</button>';}).join('')+'</div>';
+  var lst=b.filter(function(x){return f==='all'||x.tipo===f;}).map(function(x){var tp=TIPOS.filter(function(z){return z[0]===x.tipo;})[0][1];
+    return '<div class="tsum"><div style="flex:0 0 96px">'+svgFig(x.t.fig)+'</div><div style="flex:1;min-width:0"><b>'+esc(x.t.t)+' · '+esc(x.t.d)+'</b><span class="note">'+esc(tp)+' · '+esc(x.ca)+' · '+esc(x.t.tt)+'</span></div><button class="b" data-act="mtadd" data-ref="'+x.ref+'">Añadir</button></div>';}).join('');
+  return '<div style="border-top:1px solid var(--line);margin-top:10px"><h3>Banco de tareas ('+b.length+')</h3>'+chips+lst+'</div>';
+}
+
 /* ---------- Sesiones en directo: Antes / En el campo / Después ---------- */
 var obsOpen={};
 function sesLabel(k){var f=FICH[k];if(f)return [f.di.slice(0,3)+' '+f.fe.slice(0,5),f.ca];var t=SESIONES[k].t.split('·');return [t[1]?t[1].trim():('Sesión '+(k+1)),t[2]?t[2].trim():''];}
 function vSesiones(){
-  var i=S.ses,s=SESIONES[i],f=FICH[i];
-  if(!S.sesv){S.sesv=(f&&dias(dparse(f.fe))===0)?'campo':'antes';}
-  var h='<div class="schips">'+SESIONES.map(function(x,k){var l=sesLabel(k);return '<button data-act="sesgo" data-i="'+k+'" class="'+(k===i?'on':'')+'">'+esc(l[0])+'<small>'+esc(l[1])+'</small></button>';}).join('')+'</div>';
-  h+='<div class="seg">'+[['antes','1 · Antes'],['campo','2 · En el campo'],['despues','3 · Después']].map(function(x){return '<button data-act="sesv" data-v="'+x[0]+'" class="'+(S.sesv===x[0]?'on':'')+'">'+x[1]+'</button>';}).join('')+'</div>';
-  if(S.sesv==='campo')h+=vSesCampo(i);else if(S.sesv==='despues')h+=vSesDespues(i);else h+=vSesAntes(i);
+  if(!SESIONES[S.ses]||SESIONES[S.ses].del)S.ses=0;
+  var i=S.ses,s=SESIONES[i],f=FICH[i],esU=!!(f&&f.user);
+  if(!S.sesv||(S.sesv==='editar'&&!esU)){S.sesv=(f&&dias(dparse(f.fe))===0)?'campo':'antes';}
+  var h='<div class="schips">'+SESIONES.map(function(x,k){if(x.del)return '';var l=sesLabel(k);return '<button data-act="sesgo" data-i="'+k+'" class="'+(k===i?'on':'')+'">'+esc(l[0])+'<small>'+esc(l[1])+'</small></button>';}).join('')+
+   '<button data-act="msnew" style="border-style:dashed">+ Nueva<small>sesión</small></button></div>';
+  var segs=[['antes','Antes'],['campo','En el campo'],['despues','Después']];if(esU)segs.unshift(['editar','✏️ Editar']);
+  h+='<div class="seg">'+segs.map(function(x){return '<button data-act="sesv" data-v="'+x[0]+'" class="'+(S.sesv===x[0]?'on':'')+'">'+x[1]+'</button>';}).join('')+'</div>';
+  if(S.sesv==='editar')h+=vSesEditar(i);else if(S.sesv==='campo')h+=vSesCampo(i);else if(S.sesv==='despues')h+=vSesDespues(i);else h+=vSesAntes(i);
   return h;
 }
 function vSesAntes(i){
@@ -1037,7 +1121,9 @@ function vSesAntes(i){
    (f?'<details><summary class="note" style="cursor:pointer;font-weight:600">Charla inicial</summary><p>'+esc(f.ini)+'</p></details>':'')+'</div>';
   if(f){
     h+='<div class="card"><h2>Tareas ('+f.tareas.length+')</h2>'+f.tareas.map(function(t,k){return '<div class="tsum"><span class="n">'+(k+1)+'</span><div style="flex:1;min-width:0"><b>'+esc(t.t)+' · '+esc(t.d)+'</b><span class="note">'+esc(t.tt)+'</span></div></div>';}).join('')+
-     '<div class="row" style="margin-top:12px"><button class="b xl" data-act="sesv" data-v="campo" style="flex:1">▶ Ir al campo</button></div></div>';
+     (f.tareas.length?'':'<p class="note">Esta sesión aún no tiene tareas: pulsa «Editar».</p>')+
+     '<div class="row" style="margin-top:12px"><button class="b xl" data-act="sesv" data-v="campo" style="flex:1">▶ Ir al campo</button></div>'+
+     '<div class="row"><button class="b s" data-act="msdup" data-i="'+i+'">📄 Duplicar para otro día</button>'+(f.user?'<button class="b s" data-act="sesv" data-v="editar">✏️ Editar</button>':'')+'</div></div>';
     h+='<details class="acc"><summary>Ficha completa de la sesión (para preparar o imprimir)</summary><div class="in">'+vFicha(i)+'</div></details>';
   }else{
     h+='<div class="card"><h2>Plan</h2><ul>'+s.b.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>';
@@ -1534,14 +1620,14 @@ function dias(d){var n=new Date();n.setHours(0,0,0,0);return Math.round((d-n)/86
 function cuando(n){return n<0?'ya pasó':(n===0?'hoy':(n===1?'mañana':'en '+n+' días'));}
 function vInicio(){
   var ns=-1,i,j;
-  for(i=0;i<5;i++){if(dias(dparse(FICH[i].fe))>=0){ns=i;break;}}
+  var bd=1e9;Object.keys(FICH).forEach(function(k){var f0=FICH[k];if(!f0||f0.del)return;var dd=dias(dparse(f0.fe));if(dd>=0&&dd<bd){bd=dd;ns=parseInt(k,10);}});
   var pm=null;
   for(j=0;j<CALISO.length;j++){if(dias(new Date(CALISO[j][0]+'T00:00:00'))>=0){pm=CALISO[j];break;}}
   var open=0,total=0,lst=[];
   TODO.forEach(function(g){g[1].forEach(function(it){total++;if(!S.todo[it[0]]){open++;if(lst.length<5)lst.push(it[1]);}});});
   var h='';
   if(ns>=0){var f=FICH[ns];h+='<div class="hero"><h2>Próxima sesión · '+cuando(dias(dparse(f.fe)))+'</h2><div class="big">'+esc(SESIONES[ns].t)+'</div><div class="sub">'+esc(f.fe)+' · 20:00 · '+esc(f.ca)+' · '+esc(f.mc)+'<br>'+esc(f.ob)+'</div><button class="b" data-act="gos" data-i="'+ns+'">Abrir ficha de la sesión</button></div>';}
-  else h+='<div class="hero"><h2>Sesiones</h2><div class="big">Las cinco sesiones preparadas ya han pasado</div></div>';
+  else h+='<div class="hero"><h2>Sesiones</h2><div class="big">No hay ninguna sesión preparada para los próximos días</div><button class="b" data-act="msnew">+ Crear sesión</button></div>';
   if(pm){h+='<div class="hero" style="background:linear-gradient(135deg,#1f4fa3,#2f6fd0)"><h2>Próximo partido · '+cuando(dias(new Date(pm[0]+'T00:00:00')))+'</h2><div class="big">'+esc(pm[3])+'</div><div class="sub">'+esc(pm[0].split('-').reverse().join('/'))+' · '+esc(pm[1])+' · '+esc(pm[2])+'</div><button class="b" data-act="go" data-go="partido">Abrir partido</button> <button class="b" data-act="go" data-go="pizarra" style="background:#fff;color:#1f4fa3">Pizarra</button></div>';}
   var acc='';
   acc+='<div class="card"><h2>Prioridades de las dos primeras semanas</h2><ol><li><b>Intensidad y comunicación:</b> presión de 5 segundos tras perder, hablarse y ayudarse. Indicador: presiones por sesión y nota de esfuerzo de la hoja de observación.</li><li><b>Defender cerrados:</b> bloque compacto, basculación y cobertura. Indicador: goles encajados y distancias entre líneas.</li><li><b>Cohesión y confianza:</b> equipos mixtos, rituales y refuerzo positivo. Indicador: termómetro del ánimo y grupos mezclados.</li></ol><p class="note"><b>Para la fase Construir (desde diciembre):</b> definición avanzada, permutas, picardía, segundas jugadas avanzadas, regate y fuerza especial. La coordinación va de fondo, en la activación.</p></div>';
@@ -2231,6 +2317,16 @@ document.addEventListener('click',function(e){
   else if(a==='tstadd'){var tv=($('#tv')||{}).value;if(tv==='')return;PI(S.pid).tests.push({f:($('#tf')||{}).value||today(),t:parseInt(($('#tt')||{}).value,10)||0,v:tv});save();render();}
   else if(a==='tstdel'){PI(S.pid).tests.splice(parseInt(b.getAttribute('data-i'),10),1);save();render();}
   else if(a==='syncnow'){syncNow(false);}
+  else if(a==='msnew'){if(!canLeave())return;beginEdit();newUserSession();S.tab='sesiones';bankOpen=false;save();render();window.scrollTo(0,0);toast('Sesión nueva: elige las tareas y pulsa Guardar','info');}
+  else if(a==='msdup'){if(!canLeave())return;beginEdit();newUserSession(parseInt(b.getAttribute('data-i'),10));bankOpen=false;save();render();window.scrollTo(0,0);toast('Copia creada: cambia lo que quieras y pulsa Guardar','info');}
+  else if(a==='msdel'){var ud=curUser();if(ud&&confirm('¿Borrar esta sesión?')){beginEdit();ud.del=true;S.ses=0;S.sesv='antes';save();render();}}
+  else if(a==='mtbank'){bankOpen=!bankOpen;render();}
+  else if(a==='mtbf'){bankF=b.getAttribute('data-v');render();}
+  else if(a==='mtadd'){var ua=curUser();if(ua){beginEdit();ua.tareas.push({ref:b.getAttribute('data-ref')});save();render();toast('Tarea añadida','ok');}}
+  else if(a==='mtfree'){var uf=curUser();if(uf){beginEdit();uf.tareas.push({t:'',min:10,de:''});save();render();}}
+  else if(a==='mtprop'){var up=curUser();if(up&&(!up.tareas.length||confirm('¿Cambiar las tareas por una propuesta (activación, técnica, juego reducido y situación de partido)?'))){beginEdit();proponer(up);save();render();}}
+  else if(a==='mtmv'){var um=curUser(),mk=parseInt(b.getAttribute('data-k'),10),md=parseInt(b.getAttribute('data-d'),10);if(um&&um.tareas[mk+md]){beginEdit();var tmp=um.tareas[mk];um.tareas[mk]=um.tareas[mk+md];um.tareas[mk+md]=tmp;save();render();}}
+  else if(a==='mtdel'){var ux=curUser();if(ux){beginEdit();ux.tareas.splice(parseInt(b.getAttribute('data-k'),10),1);save();render();}}
   else if(a==='more'){if($('#more').className==='show')hideMore();else showMore();}
   else if(a==='sesgo'){var si=parseInt(b.getAttribute('data-i'),10);if(si!==S.ses&&!canLeave())return;S.ses=si;S.attd=null;S.sstep=0;S.sesv=null;save();render();window.scrollTo(0,0);}
   else if(a==='sesv'){var sv=b.getAttribute('data-v');if(sv!==S.sesv&&!canLeave())return;S.sesv=sv;save();render();window.scrollTo(0,0);}
@@ -2328,6 +2424,8 @@ document.addEventListener('change',function(e){
     S.obs[i][id2][f2==='as'?'as':f2]=(t.type==='checkbox')?t.checked:t.value;
     save();if(f2!=='nt')render();return;
   }
+  if(t.hasAttribute('data-ms')){var um2=curUser();if(um2){um2[t.getAttribute('data-ms')]=t.value;if(t.getAttribute('data-ms')==='fe')um2.ca=um2.ca||campoPorDia(t.value);save();render();}return;}
+  if(t.hasAttribute('data-mt')){var um3=curUser(),k3=parseInt(t.getAttribute('data-k'),10);if(um3&&um3.tareas[k3]){var f3=t.getAttribute('data-mt');um3.tareas[k3][f3]=f3==='min'?(parseInt(t.value,10)||0):t.value;save();render();}return;}
   if(t.hasAttribute('data-emg')){S.emg=S.emg||{};S.emg[t.getAttribute('data-emg')]=t.value;save();return;}
   if(t.hasAttribute('data-tl')){S.match.tl=S.match.tl||{};S.match.tl[t.getAttribute('data-tl')]=t.checked;save();return;}
   if(t.hasAttribute('data-tlh')){S.tlh=t.value;save();render();return;}
