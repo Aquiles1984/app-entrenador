@@ -680,8 +680,8 @@ function vPlantilla(){
    '<div class="sc"><table class="ptab"><tr>'+thSort('d','Nº')+thSort('n','Nombre')+thSort('pos','Principal')+'<th class="hm">Secundaria</th><th class="hm">Pie</th>'+thSort('min','Min')+'</tr>'+rows+'</table></div></div>'+
    '<div class="card"><h2>Copia de seguridad</h2><p class="note">Última copia: '+esc(S.exp||'nunca')+'. Haz una copia cada semana.</p><div class="row">'+
    '<button class="b" data-act="export">Exportar copia</button>'+
-   '<label class="b s" style="display:inline-block">Importar copia<input type="file" id="imp" accept="application/json" style="display:none"></label>'+
-   '<label class="b" style="display:inline-block">Fusionar copia<input type="file" id="impm" accept="application/json" style="display:none"></label>'+
+   '<label class="b s" style="display:inline-block">Importar copia<input type="file" id="imp" style="display:none"></label>'+
+   '<label class="b" style="display:inline-block">Fusionar copia<input type="file" id="impm" style="display:none"></label>'+
    '<button class="b w" data-act="reset">Borrar todo</button></div><p class="note">Fusionar copia junta la copia de otro dispositivo (por cable) con los datos de este: en cada apartado se queda lo modificado más recientemente y no se pierde nada del resto. Importar copia, en cambio, sustituye todo.</p></div>';
 }
 
