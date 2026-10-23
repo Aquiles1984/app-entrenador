@@ -556,7 +556,7 @@ function toast(msg,type){
 function isEditField(t){
   if(!t||!/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))return false;
   if(t.type==='checkbox'||t.type==='file')return false;
-  if(t.id==='ses'||t.id==='imp'||t.id==='impm')return false;
+  if(t.id==='ses'||t.id==='imp'||t.id==='impm'||t.id==='pastetxt')return false;
   if(t.hasAttribute('data-sync')||t.hasAttribute('data-attd')||t.hasAttribute('data-tlh'))return false;
   return !!(t.closest&&t.closest('#view'));
 }
@@ -682,7 +682,11 @@ function vPlantilla(){
    '<button class="b" data-act="export">Exportar copia</button>'+
    '<label class="b s" style="display:inline-block">Importar copia<input type="file" id="imp" style="display:none"></label>'+
    '<label class="b" style="display:inline-block">Fusionar copia<input type="file" id="impm" style="display:none"></label>'+
-   '<button class="b w" data-act="reset">Borrar todo</button></div><p class="note">Fusionar copia junta la copia de otro dispositivo (por cable) con los datos de este: en cada apartado se queda lo modificado más recientemente y no se pierde nada del resto. Importar copia, en cambio, sustituye todo.</p></div>';
+   '<button class="b w" data-act="reset">Borrar todo</button></div><p class="note">Fusionar copia junta la copia de otro dispositivo (por cable) con los datos de este: en cada apartado se queda lo modificado más recientemente y no se pierde nada del resto. Importar copia, en cambio, sustituye todo.</p>'+
+   '<h3>Pasar la copia como texto (por WhatsApp)</h3><p class="note">Sin archivos: «Copiar como texto», pégalo en un mensaje de WhatsApp para ti, y en el otro dispositivo copia el mensaje, pégalo aquí y pulsa Importar o Fusionar.</p>'+
+   '<div class="row"><button class="b s" data-act="copytxt">Copiar como texto</button></div>'+
+   '<textarea id="pastetxt" rows="3" style="width:100%" placeholder="Pega aquí la copia recibida por WhatsApp"></textarea>'+
+   '<div class="row"><button class="b" data-act="pasteimp">Importar (sustituye todo)</button><button class="b s" data-act="pastemerge">Fusionar</button></div></div>';
 }
 
 /* ---------- Pizarra ---------- */
@@ -1699,6 +1703,31 @@ if(/^https?:$/.test(location.protocol)){
 setTimeout(function(){if(sCfg().url)syncNow(true);},1500);
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&sCfg().url)syncNow(true);});
 
+/* ---------- Importar y fusionar copias (archivo o texto) ---------- */
+function doImport(o){
+  if(!o||!o.players)throw new Error('copia no válida');
+  S=o;normS();DIRTY=false;SNAP=null;hideSaveBar();save();render();toast('Copia importada: '+S.players.length+' jugadores','ok');
+}
+function doMerge(o){
+  if(!o||!o.players)throw new Error('copia no válida');
+  var its=o._ts||{},ch=[];
+  Object.keys(o).forEach(function(k){
+    if(NOSYNC[k])return;
+    if(!(k in S)){S[k]=o[k];S._ts[k]=its[k]||0;lastJ[k]=JSON.stringify(S[k]);return;}
+    if(JSON.stringify(S[k])===JSON.stringify(o[k]))return;
+    if((its[k]||0)>(S._ts[k]||0)){S[k]=o[k];S._ts[k]=its[k];lastJ[k]=JSON.stringify(S[k]);ch.push(k);}
+  });
+  normS();save();
+  syncMsg='Copia fusionada: '+(ch.length?'se tomaron de la copia estos apartados, por ser más recientes: '+ch.join(', ')+'.':'no había apartados más recientes en la copia.')+' Se mantiene lo de este dispositivo en el resto.';
+  render();toast(ch.length?'Copia fusionada ('+ch.length+' apartados nuevos)':'Copia fusionada: no había nada más reciente','ok');
+}
+function copiaTexto(){S.exp=today();realSave();return 'SUB14COPIA:'+JSON.stringify(S);}
+function leerPegado(){
+  var t=(($('#pastetxt')||{}).value||'').trim();
+  var i=t.indexOf('{');if(i<0)throw new Error('vacío');
+  return JSON.parse(t.slice(i,t.lastIndexOf('}')+1));
+}
+
 /* ---------- Descargar la propia app al dispositivo ---------- */
 function appHtml(){
   var c=document.documentElement.cloneNode(true);
@@ -2028,6 +2057,9 @@ document.addEventListener('click',function(e){
   else if(a==='tstadd'){var tv=($('#tv')||{}).value;if(tv==='')return;PI(S.pid).tests.push({f:($('#tf')||{}).value||today(),t:parseInt(($('#tt')||{}).value,10)||0,v:tv});save();render();}
   else if(a==='tstdel'){PI(S.pid).tests.splice(parseInt(b.getAttribute('data-i'),10),1);save();render();}
   else if(a==='syncnow'){syncNow(false);}
+  else if(a==='copytxt'){var tx=copiaTexto(),okc=function(){toast('Copia copiada: pégala en WhatsApp','ok');};try{navigator.clipboard.writeText(tx).then(okc,function(){var ta=$('#pastetxt');ta.value=tx;ta.select();document.execCommand('copy');ta.value='';okc();});}catch(x){var ta2=$('#pastetxt');ta2.value=tx;ta2.select();document.execCommand('copy');ta2.value='';okc();}}
+  else if(a==='pasteimp'){try{var po=leerPegado();if(confirm('Esto sustituye todos los datos de este dispositivo por los de la copia ('+(po.players||[]).length+' jugadores). ¿Seguir?'))doImport(po);}catch(x){toast('No hay una copia válida pegada','warn');}}
+  else if(a==='pastemerge'){try{doMerge(leerPegado());}catch(x){toast('No hay una copia válida pegada','warn');}}
   else if(a==='dlapp'){downloadApp();toast('Descargando entrenador_v3.html','ok');}
   else if(a==='accall'){var op=b.getAttribute('data-v')==='1';[].slice.call(document.querySelectorAll('#view details[data-acc]')).forEach(function(d){d.open=op;openAcc[d.getAttribute('data-acc')]=op;});}
   else if(a==='gr'){var gid=b.getAttribute('data-id'),gv=b.getAttribute('data-v');S.gr=S.gr||{};var g0=S.gr[gid]||{};if(g0.k===gv)delete S.gr[gid];else S.gr[gid]={k:gv,z:gv==='V'?'':(g0.z||''),f:today()};save();render();}
@@ -2091,24 +2123,12 @@ document.addEventListener('change',function(e){
   var t=e.target;
   if(t.id==='impm'){
     var fm=t.files[0];if(!fm)return;var rm=new FileReader();
-    rm.onload=function(){try{
-      var o=JSON.parse(rm.result);if(!o||!o.players)throw 0;
-      var its=o._ts||{},ch=[],nuevo=0,igual=0;
-      Object.keys(o).forEach(function(k){
-        if(NOSYNC[k])return;
-        if(!(k in S)){S[k]=o[k];S._ts[k]=its[k]||0;lastJ[k]=JSON.stringify(S[k]);nuevo++;return;}
-        if(JSON.stringify(S[k])===JSON.stringify(o[k])){igual++;return;}
-        if((its[k]||0)>(S._ts[k]||0)){S[k]=o[k];S._ts[k]=its[k];lastJ[k]=JSON.stringify(S[k]);ch.push(k);}
-      });
-      save();
-      syncMsg='Copia fusionada: '+(ch.length?'se tomaron de la copia estos apartados, por ser más recientes: '+ch.join(', ')+'.':'no había apartados más recientes en la copia.')+' Se mantiene lo de este dispositivo en el resto.';
-      render();
-    }catch(x){syncMsg='Archivo no válido.';render();}};
+    rm.onload=function(){try{doMerge(JSON.parse(rm.result));}catch(x){toast('Archivo no válido','warn');}};
     rm.readAsText(fm);t.value='';return;
   }
   if(t.id==='imp'){
     var f=t.files[0];if(!f)return;var r=new FileReader();
-    r.onload=function(){try{var o=JSON.parse(r.result);if(!o||!o.players)throw 0;S=o;normS();DIRTY=false;SNAP=null;hideSaveBar();save();render();toast('Copia importada','ok');}catch(x){alert('Archivo no válido.');}};
+    r.onload=function(){try{doImport(JSON.parse(r.result));}catch(x){toast('Archivo no válido','warn');}};
     r.readAsText(f);return;
   }
   if(t.id==='form'){S.lineup.form=t.value;S.lineup.pos={};save();render();return;}
