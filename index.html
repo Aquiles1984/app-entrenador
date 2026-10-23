@@ -205,6 +205,26 @@ html,body{overflow-x:hidden}
 @media(max-width:620px){.ptab .hm{display:none}.row.sm{display:flex}.ptab [data-f="n"]{min-width:70px!important}.ptab [data-f="d"]{width:38px!important;padding:7px 2px}.ptab tr:not(.det) select{max-width:98px;font-size:13px;padding:7px 4px}.ptab th{font-size:12px;padding:6px 3px}.ptab td{padding:5px 2px}.ptab [data-act="pdet"]{padding:6px 8px!important}}
 .oncamp{width:8px;height:8px;border-radius:50%;background:var(--acc);display:inline-block;margin-right:6px}
 </style>
+<style id="colores">
+/* Colores del CF Caldes de Montbui: azul y rojo (camiseta a rayas rojas y azules, pantalón y medias azules) */
+:root{--acc:#1C3F94;--acc2:#E7EDF8;--gold:#C8102E;--ok:#1C3F94}
+@media (prefers-color-scheme:dark){:root{--acc:#7FA3FF;--acc2:#17213A;--gold:#FF5A6E;--ok:#7FA3FF}}
+header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!important;border-bottom:4px solid #C8102E}
+.hero{background:linear-gradient(135deg,#1C3F94,#2A55B8)!important}
+.hero[style*="1f4fa3"]{background:linear-gradient(135deg,#A50D25,#C8102E)!important}
+.hero .b{background:#fff!important;color:#1C3F94!important}
+#cdbar{background:#16327A}
+.card h2{border-left-color:#C8102E}
+.card.task{border-top-color:#C8102E}
+.pill{background:#C8102E;color:#fff}
+.dor{background:#E7EDF8;color:#1C3F94}
+@media (prefers-color-scheme:dark){.dor{background:#17213A;color:#7FA3FF}}
+.concl{border-left-color:#1C3F94}
+.chip.on,.conv button.on{border-color:#1C3F94}
+.alerta.bien{background:#E7EDF8;color:#1C3F94}
+.toast.ok{background:#1C3F94}
+#savebar .b:not(.s){background:#C8102E}
+</style>
 </head>
 <body>
 <header>
@@ -1696,7 +1716,7 @@ function baseUrl(){return (location.origin+location.pathname).replace(/[^\/]*$/,
 /* App instalable y sin conexión cuando se sirve por HTTPS (por ejemplo, detrás del dominio de la app de referencia) */
 if(/^https?:$/.test(location.protocol)){
   try{var mf=document.createElement('link');mf.rel='manifest';mf.href='manifest.webmanifest';document.head.appendChild(mf);
-    var tc=document.createElement('meta');tc.name='theme-color';tc.content='#0b6b3a';document.head.appendChild(tc);}catch(e){}
+    var tc=document.createElement('meta');tc.name='theme-color';tc.content='#1C3F94';document.head.appendChild(tc);}catch(e){}
   if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')){try{navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){}}
   var ss=sCfg();if(!ss.url){ss.url=baseUrl();sSet(ss);}
 }
