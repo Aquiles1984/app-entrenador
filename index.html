@@ -306,7 +306,7 @@ header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!im
 </head>
 <body>
 <header>
-  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.5</span></h1>
+  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.6</span></h1>
   <p class="priv">Datos de menores: se guardan solo en este dispositivo. No subir este archivo ni las copias de seguridad a ningún servicio.</p>
 </header>
 <nav id="tabs"></nav>
@@ -824,7 +824,7 @@ function vPlantilla(){
    '<div class="sc"><table class="ptab"><tr>'+thSort('d','Nº')+thSort('n','Nombre')+thSort('pos','Principal')+'<th class="hm">Secundaria</th><th class="hm">Pie</th>'+thSort('min','Min')+'</tr>'+rows+'</table></div></div>'+
    '<div class="card"><h2>Copia de seguridad</h2><p class="note">Última copia fuera de la app: <b>'+esc(S.exp?feES(S.exp):'nunca')+'</b>. Hazla una vez a la semana.</p>'+
    '<h3>1. Copia fuera del móvil (una vez a la semana)</h3><p class="note">Elige Samsung Notes (con la sincronización de Samsung Cloud activada), Google Drive o WhatsApp. Es lo único que te salva si pierdes el móvil.</p>'+
-   '<div class="row">'+(navigator.share?'<button class="b" data-act="sharecopy">📤 Compartir copia</button>':'')+'<button class="b s" data-act="copytxt">Copiar como texto</button></div>'+
+   '<div class="row"><button class="b xl" data-act="sharecopy" style="flex:1">📤 Compartir copia</button></div>'+
    '<h3>2. Copias automáticas en este móvil</h3>'+vSnaps()+
    '<h3>3. Recuperar desde una copia</h3><p class="note">Copia el texto de la nota o del mensaje, pégalo aquí y pulsa Importar (o Fusionar si en este dispositivo ya hay datos que quieres conservar).</p>'+
    '<textarea id="pastetxt" rows="3" style="width:100%" placeholder="Pega aquí la copia (empieza por SUB14COPIA:)"></textarea>'+
@@ -2175,10 +2175,11 @@ function vInicio(){
   if(!ABIERTA_TEMPORAL&&/Android|iPhone|Mobile/i.test(navigator.userAgent)&&!/^https?:$/.test(location.protocol))h+='<div class="row"><button class="b s" data-act="dlapp">📲 Descargar la app a este móvil</button></div>';
   var q=[['partido','Partido en vivo'],['pizarra','Pizarra y once'],['sesiones','Sesión, asistencia y cuenta atrás'],['jug','Jugadores'],['posi','Táctica'],['plan','Planificación']];
   var dcp=S.exp?daysSince(S.exp):null;
-  if(dcp===null||dcp>7)h+='<div class="warn" style="font-size:15px">💾 '+(S.exp?'Tu última copia es de hace '+dcp+' días.':'Todavía no has hecho ninguna copia.')+' Si pierdes el móvil, lo pierdes todo. '+(navigator.share?'<button class="b" data-act="sharecopy" style="margin-top:6px">📤 Compartir copia (Samsung Notes, Drive o WhatsApp)</button>':'<button class="b" data-act="copytxt" style="margin-top:6px">Copiar como texto</button>')+'</div>';
+  if(dcp===null||dcp>7)h+='<div class="warn" style="font-size:15px">💾 '+(S.exp?'Tu última copia es de hace '+dcp+' días.':'Todavía no has hecho ninguna copia.')+' Si pierdes el móvil, lo pierdes todo. <button class="b" data-act="sharecopy" style="margin-top:6px">📤 Compartir copia (Samsung Notes, Drive o WhatsApp)</button></div>';
   var gc=grCount();
   if(gc.A||gc.R)h+='<div class="warn" style="font-size:15px">🚦 Semáforo: '+gc.A+' con molestia y '+gc.R+' con dolor. Ajusta la carga hoy (Sesiones).</div>';
   h+='<div class="card"><h2>Herramientas de campo</h2><div class="grid3">'+q.map(function(x){return '<button class="b" data-act="go" data-go="'+x[0]+'">'+(ICON[x[0]]||'')+' '+esc(x[1])+'</button>';}).join('')+'</div></div>';
+  if(!(dcp===null||dcp>7))h+='<div class="row" style="align-items:center"><button class="b s" data-act="sharecopy">📤 Compartir copia</button><span class="note">Última copia: '+esc(feES(S.exp))+'</span></div>';
   h+='<details class="acc"><summary>Prioridades, plan de esta semana y pendientes ('+open+')</summary><div class="in">'+acc+'</div></details>';
   return h;
 }
@@ -2906,7 +2907,9 @@ document.addEventListener('click',function(e){
   else if(a==='sesval'){normS();beginEdit();var dv=new Date();S.sval[S.ses]=('0'+dv.getDate()).slice(-2)+'/'+('0'+(dv.getMonth()+1)).slice(-2);save();render();toast('Sesión validada. Pulsa Guardar.','info');}
   else if(a==='sesunval'){normS();beginEdit();delete S.sval[S.ses];save();render();}
   else if(a==='sesfin'){S.sdone=S.sdone||{};S.sdone[S.ses]={f:today()};if(DIRTY)saveAll();else{realSave();toast('Sesión terminada y guardada en Historial','ok');}snapTake('Sesión terminada',true);render();}
-  else if(a==='sharecopy'){var txs='SUB14COPIA:'+JSON.stringify(S);if(navigator.share){navigator.share({title:'Copia S14A '+feES(today()),text:txs}).then(function(){S.exp=today();realSave();toast('Copia enviada','ok');render();},function(e){if(!e||e.name!=='AbortError')toast('No se pudo compartir: usa «Copiar como texto»','warn');});}}
+  else if(a==='sharecopy'){var txs='SUB14COPIA:'+JSON.stringify(S);if(navigator.share){navigator.share({title:'Copia S14A '+feES(today()),text:txs}).then(function(){S.exp=today();realSave();toast('Copia enviada','ok');render();},function(e){if(!e||e.name!=='AbortError')toast('No se pudo compartir. Prueba otra vez o elige otra app.','warn');});}
+    else{var okS=function(){S.exp=today();realSave();toast('Copia copiada: abre Samsung Notes, crea una nota y pega','ok');render();};if(!$('#pastetxt')){var tS=document.createElement('textarea');tS.id='pastetxt';tS.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(tS);}
+      try{navigator.clipboard.writeText(txs).then(okS,function(){var ta=$('#pastetxt');ta.value=txs;ta.select();document.execCommand('copy');ta.value='';okS();});}catch(x){var ta3=$('#pastetxt');ta3.value=txs;ta3.select();document.execCommand('copy');ta3.value='';okS();}}}
   else if(a==='snaprest'){var sl0=snapList(),si=parseInt(b.getAttribute('data-i'),10),sv0=sl0[si];if(!sv0)return;if(!confirm('¿Volver a los datos del '+snapFecha(sv0.t)+'? Lo que tienes ahora se guarda antes como copia automática, por si te arrepientes.'))return;
     var so=JSON.parse(sv0.d);snapTake('Antes de volver al '+snapFecha(sv0.t),true);doImport(so);}
   else if(a==='mtbank'){bankOpen=!bankOpen;render();if(bankOpen){var bk=$('#banco');if(bk)bk.scrollIntoView({block:'start'});}}
