@@ -309,7 +309,7 @@ header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!im
 </head>
 <body>
 <header>
-  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.10</span></h1>
+  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.11</span></h1>
   <p class="priv">Datos de menores: se guardan solo en este dispositivo. No subir este archivo ni las copias de seguridad a ningún servicio.</p>
 </header>
 <nav id="tabs"></nav>
@@ -637,7 +637,7 @@ function save(){
 }
 function matchSave(){
   if(!SNAP||!S.match||S.match.phase==='pre')return;
-  try{var o=JSON.parse(SNAP);o.match=S.match;o.cd=S.cd;SNAP=JSON.stringify(o);localStorage.setItem(KEY,SNAP);}catch(e){}
+  try{var o=JSON.parse(SNAP);o.match=S.match;o.cd=S.cd;o.cdPrev=S.cdPrev;SNAP=JSON.stringify(o);localStorage.setItem(KEY,SNAP);}catch(e){}
 }
 function beginEdit(){if(!DIRTY)SNAP=JSON.stringify(S);if(typeof commitDraft==='function')commitDraft();HOLD=true;setTimeout(function(){HOLD=false;},0);}
 function markDirty(){if(!DIRTY){DIRTY=true;showSaveBar();}}
@@ -649,7 +649,7 @@ function showSaveBar(){
 function hideSaveBar(){var b=$('#savebar');if(b){b.className='';b.innerHTML='';}}
 function saveAll(){DIRTY=false;HOLD=false;SNAP=null;realSave();if(typeof snapTake==='function')snapTake('Cambios guardados',false);hideSaveBar();toast('Cambios guardados','ok');var y=window.scrollY;render();window.scrollTo(0,y);}
 function cancelAll(){
-  if(SNAP){var o=JSON.parse(SNAP);if(S.match&&S.match.phase!=='pre')o.match=S.match;o.cd=S.cd;o.tab=S.tab;S=o;lastJ={};Object.keys(S).forEach(function(k){if(!NOSYNC[k])lastJ[k]=JSON.stringify(S[k]);});}
+  if(SNAP){var o=JSON.parse(SNAP);if(S.match&&S.match.phase!=='pre')o.match=S.match;o.cd=S.cd;o.cdPrev=S.cdPrev;o.tab=S.tab;S=o;lastJ={};Object.keys(S).forEach(function(k){if(!NOSYNC[k])lastJ[k]=JSON.stringify(S[k]);});}
   DIRTY=false;HOLD=false;SNAP=null;realSave();hideSaveBar();render();toast('Cambios descartados','info');
 }
 function canLeave(){
@@ -711,13 +711,13 @@ function vMas(){
   return '<h3 style="margin:4px 2px 10px">Campo</h3>'+g(c1)+'<h3 style="margin:18px 2px 10px">Consulta</h3>'+g(c2);
 }
 /* Botón de atrás: historial propio para que el «atrás» del móvil no cierre la app */
-function navState(){return {tab:S.tab,sesv:S.sesv||null,sstep:S.sstep||0,jv:S.jv||'lista'};}
+function navState(){return {tab:S.tab,ses:S.ses,sesv:S.sesv||null,sstep:S.sstep||0,jv:S.jv||'lista'};}
 function pushNav(){try{history.pushState(navState(),'','#'+S.tab);}catch(e){}}
 window.addEventListener('popstate',function(e){
   var st=e.state;
   if(DIRTY){try{history.pushState(navState(),'','#'+S.tab);}catch(x){}canLeave();return;}
   if(!st){st={tab:'inicio'};}
-  S.tab=st.tab||'inicio';if(st.sesv!==undefined)S.sesv=st.sesv;if(st.sstep!==undefined)S.sstep=st.sstep;if(st.jv)S.jv=st.jv;
+  S.tab=st.tab||'inicio';if(st.ses!==undefined&&SESIONES[st.ses])S.ses=st.ses;if(st.sesv!==undefined)S.sesv=st.sesv;if(st.sstep!==undefined)S.sstep=st.sstep;if(st.jv)S.jv=st.jv;
   save();render();window.scrollTo(0,0);
 });
 function showMore(){
@@ -909,7 +909,7 @@ function dragStart(e){
   var c=$('#cv');if(!c||e.target!==c)return;
   var q=cvXY(e),best=-1,bd=1e9;
   FORM[S.lineup.form].forEach(function(s,i){var p=slotPos(i),dx=(p[0]-q[0])*4.2,dy=(p[1]-q[1])*5.46,d=dx*dx+dy*dy;if(d<bd){bd=d;best=i;}});
-  if(bd<30*30){drag=best;try{c.setPointerCapture(e.pointerId);}catch(x){}}
+  if(bd<30*30){beginEdit();drag=best;try{c.setPointerCapture(e.pointerId);}catch(x){}}
 }
 function dragMove(e){if(drag===null)return;var q=cvXY(e);S.lineup.pos[drag]=[Math.max(4,Math.min(96,q[0])),Math.max(4,Math.min(96,q[1]))];drawBoard();}
 function dragEnd(){if(drag!==null){drag=null;save();}}
@@ -981,7 +981,7 @@ function vTitulares(m){
    ''+
    (m.conv.length?'<div class="conv">'+sortedPlayers().filter(function(p){return m.conv.indexOf(p.id)>=0;}).map(function(p){var on=t.indexOf(p.id)>=0;return '<button data-act="tit" data-id="'+p.id+'" class="'+(on?'on':'')+'"><span class="dor">'+esc(p.d)+'</span><span>'+esc(p.n)+'<span class="ps">'+esc(p.pos)+(on?' · titular':'')+'</span></span></button>';}).join('')+'</div>':'<p class="warn">Primero convoca a los jugadores.</p>')+
    (m.err?'<div class="warn">'+esc(m.err)+'</div>':'')+
-   '<div class="row"><button class="b xl" data-act="start"'+(n===11?'':' disabled')+'>▶ Empezar el partido</button>'+(n!==11?'<span class="note">Faltan '+(11-n>0?(11-n)+' titulares':'quitar '+(n-11))+'</span>':'')+'</div></div>';
+   '<div class="row"><button class="b xl" data-act="start"'+(n>=7&&n<=11?'':' disabled')+'>▶ Empezar el partido</button>'+(n!==11?'<span class="note">'+(n<11?'Faltan '+(11-n):'Sobran '+(n-11))+'</span>':'')+'</div></div>';
 }
 var TL=[
  [90,'Llega el cuerpo técnico','Campo y porterías, material (balones, petos, conos), botiquín, agua, acta y licencias.'],
@@ -1116,7 +1116,7 @@ document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='hidden'){var ae=document.activeElement;if(ae&&ae.blur&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName))ae.blur();}
 });
 window.addEventListener('pagehide',function(){var ae=document.activeElement;if(ae&&ae.blur&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName))ae.blur();});
-if(S.match.running&&Date.now()-(S.match.lastTs||0)>600000){S.match.running=false;}
+if(S.match.running){if(Date.now()-(S.match.lastTs||0)>45*60000)S.match.running=false;else{try{setTimeout(function(){wl(true);},0);}catch(e){}}}
 
 /* ---------- Sesiones ---------- */
 /* ---------- Historial: partidos, sesiones y asistencia ---------- */
@@ -1817,8 +1817,9 @@ function rondoSq(x,y,w,nb,nr){
   var rs=[[x+w/2,y+w/2],[x+w/3,y+w/2+2]].slice(0,nr);
   return o.concat(pls('a',pts),pls('b',rs));
 }
+var SVGN=0;
 function svgFig(it){
-  var s='<svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px;border-radius:8px;background:#2e8b57;display:block"><defs><marker id="ah" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 z" fill="#fff"/></marker></defs>';
+  var s='<svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px;border-radius:8px;background:#2e8b57;display:block"><defs><marker id="ah'+(++SVGN)+'" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 z" fill="#fff"/></marker></defs>';
   it.forEach(function(q){
     var k=q[0];
     if(k==='z')s+='<rect x="'+q[1]+'" y="'+q[2]+'" width="'+q[3]+'" height="'+q[4]+'" fill="none" stroke="#fff" stroke-width=".5" stroke-dasharray="2 1.5"/>'+(q[5]?'<text x="'+(q[1]+1)+'" y="'+(q[2]-1)+'" font-size="3" fill="#fff">'+esc(q[5])+'</text>':'');
@@ -1827,7 +1828,7 @@ function svgFig(it){
     else if(k==='g')s+='<rect x="'+q[1]+'" y="'+q[2]+'" width="'+q[3]+'" height="2.4" fill="#fff"/>';
     else if(k==='p'){var col={a:'#1f6feb',b:'#e5484d',n:'#f5c518',g:'#222'}[q[3]]||'#999';s+='<circle cx="'+q[1]+'" cy="'+q[2]+'" r="2.4" fill="'+col+'" stroke="#fff" stroke-width=".4"/>'+((q[4]!==''&&q[4]!=null)?'<text x="'+q[1]+'" y="'+(q[2]+1)+'" font-size="2.6" fill="'+(q[3]==='n'?'#000':'#fff')+'" text-anchor="middle">'+esc(q[4])+'</text>':'');}
     else if(k==='b')s+='<circle cx="'+q[1]+'" cy="'+q[2]+'" r="1.2" fill="#fff" stroke="#000" stroke-width=".3"/>';
-    else if(k==='a'){var st=q[5]==='r'?' stroke-dasharray="1.6 1.2"':'';s+='<line x1="'+q[1]+'" y1="'+q[2]+'" x2="'+q[3]+'" y2="'+q[4]+'" stroke="#fff" stroke-width=".7"'+st+' marker-end="url(#ah)"/>';}
+    else if(k==='a'){var st=q[5]==='r'?' stroke-dasharray="1.6 1.2"':'';s+='<line x1="'+q[1]+'" y1="'+q[2]+'" x2="'+q[3]+'" y2="'+q[4]+'" stroke="#fff" stroke-width=".7"'+st+' marker-end="url(#ah'+SVGN+')"/>';}
     else if(k==='t')s+='<text x="'+q[1]+'" y="'+q[2]+'" font-size="'+(q[4]||3.2)+'" fill="#fff" text-anchor="'+(q[5]||'start')+'">'+esc(q[3])+'</text>';
   });
   return s+'</svg>';
@@ -2534,7 +2535,7 @@ document.addEventListener('visibilitychange',function(){if(document.visibilitySt
 function doImport(o){
   if(!o||!o.players)throw new Error('copia no válida');
   snapTake('Antes de importar',true);
-  S=o;normS();DIRTY=false;SNAP=null;hideSaveBar();save();render();toast('Copia importada: '+S.players.length+' jugadores','ok');
+  S=o;normS();if(S.match&&S.match.running){S.match.running=false;S.match.lastTs=Date.now();}DIRTY=false;SNAP=null;hideSaveBar();save();render();toast('Copia importada: '+S.players.length+' jugadores','ok');
 }
 function doMerge(o){
   if(!o||!o.players)throw new Error('copia no válida');
@@ -2546,7 +2547,7 @@ function doMerge(o){
     if(JSON.stringify(S[k])===JSON.stringify(o[k]))return;
     if((its[k]||0)>(S._ts[k]||0)){S[k]=o[k];S._ts[k]=its[k];lastJ[k]=JSON.stringify(S[k]);ch.push(k);}
   });
-  normS();save();
+  normS();if(S.match&&S.match.running){S.match.running=false;S.match.lastTs=Date.now();}save();
   syncMsg='Copia fusionada: '+(ch.length?'se tomaron de la copia estos apartados, por ser más recientes: '+ch.join(', ')+'.':'no había apartados más recientes en la copia.')+' Se mantiene lo de este dispositivo en el resto.';
   render();toast(ch.length?'Copia fusionada ('+ch.length+' apartados nuevos)':'Copia fusionada: no había nada más reciente','ok');
 }
@@ -2658,6 +2659,7 @@ function cdAlarm(){
 }
 function cdStart(sec,l){
   try{var A=window.AudioContext||window.webkitAudioContext;if(A){cdCtx=cdCtx||new A();if(cdCtx.resume)cdCtx.resume();}}catch(e){}
+  if(l!=='Pausa de agua')S.cdPrev=null;
   S.cd={l:l,dur:sec,end:Date.now()+sec*1000,rem:null,done:false};save();wl(true);cdShow();
 }
 function cdShow(){
@@ -2900,7 +2902,7 @@ document.addEventListener('click',function(e){
     var blob=new Blob([JSON.stringify(S)],{type:'application/json'}),u=URL.createObjectURL(blob),l=document.createElement('a');
     l.href=u;l.download='entrenador_sub14_copia.json';document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u);},500);render();
   }else if(a==='reset'){
-    if(confirm('Se borrarán todos los datos de este dispositivo. ¿Seguro?')){snapTake('Antes de borrar todo',true);S=fresh();save();render();}
+    if(confirm('Se borrarán todos los datos de este dispositivo. ¿Seguro?')){snapTake('Antes de borrar todo',true);S=fresh();normS();DIRTY=false;HOLD=false;SNAP=null;hideSaveBar();realSave();render();}
   }else if(a==='capasig'){
     var cv=parseInt(($('#capsel')||{}).value,10);
     if(cv){S.cap.hist.push({f:new Date().toISOString().slice(0,10),id:cv});save();render();}
@@ -2924,7 +2926,7 @@ document.addEventListener('click',function(e){
   else if(a==='msnew'){if(!canLeave())return;beginEdit();newUserSession();S.tab='sesiones';bankOpen=false;save();render();window.scrollTo(0,0);toast('Sesión nueva: elige las tareas y pulsa Guardar','info');}
   else if(a==='msdup'){if(!canLeave())return;beginEdit();newUserSession(parseInt(b.getAttribute('data-i'),10));bankOpen=false;save();render();window.scrollTo(0,0);toast('Copia creada: cambia lo que quieras y pulsa Guardar','info');}
   else if(a==='msdel'){var ud=curUser();if(ud&&FICH[S.ses]&&FICH[S.ses].over){if(confirm('¿Volver a la sesión original y descartar tus cambios?')){beginEdit();delete S.sover[S.ses];if(S.sprop)delete S.sprop[S.ses];S.sesv='antes';save();render();}}else if(ud&&confirm('¿Borrar esta sesión?')){beginEdit();ud.del=true;S.ses=0;S.sesv='antes';save();render();}}
-  else if(a==='sesreset'){var ir=S.ses;if(!confirm('¿Reiniciar esta sesión? Se borra el avance de las tareas, el cronómetro y la marca de «terminada». Lo de «Después» (esfuerzo y notas) se mantiene.'))return;
+  else if(a==='sesreset'){if(!canLeave())return;var ir=S.ses;if(!confirm('¿Reiniciar esta sesión? Se borra el avance de las tareas, el cronómetro y la marca de «terminada». Lo de «Después» (esfuerzo y notas) se mantiene.'))return;
     snapTake('Antes de reiniciar la sesión',true);S.sprog=S.sprog||{};delete S.sprog[ir];if(S.sdone)delete S.sdone[ir];S.sstep=0;
     if(S.cd&&S.cd.l&&/^Tarea \d+ · /.test(S.cd.l))S.cd=null;if(S.cdPrev){S.cdPrev=null;if(S.cd&&S.cd.l==='Pausa de agua')S.cd=null;}cdShow();
     var dR=attDate(ir);if(S.att&&S.att[dR]&&Object.keys(S.att[dR]).length&&confirm('¿Borrar también el pase de lista del '+feES(dR)+'?'))delete S.att[dR];
@@ -2936,9 +2938,9 @@ document.addEventListener('click',function(e){
   else if(a==='sesval'){normS();beginEdit();var dv=new Date();S.sval[S.ses]=('0'+dv.getDate()).slice(-2)+'/'+('0'+(dv.getMonth()+1)).slice(-2);save();render();toast('Sesión validada. Pulsa Guardar.','info');}
   else if(a==='sesunval'){normS();beginEdit();delete S.sval[S.ses];save();render();}
   else if(a==='sesfin'){S.sdone=S.sdone||{};S.sdone[S.ses]={f:today()};if(DIRTY)saveAll();else{realSave();toast('Sesión terminada y guardada en Historial','ok');}snapTake('Sesión terminada',true);render();}
-  else if(a==='sharecopy'){var txs='SUB14COPIA:'+JSON.stringify(S);if(navigator.share){navigator.share({title:'Copia S14A '+feES(today()),text:txs}).then(function(){S.exp=today();realSave();toast('Copia enviada','ok');render();},function(e){if(!e||e.name!=='AbortError')toast('No se pudo compartir. Prueba otra vez o elige otra app.','warn');});}
-    else{var okS=function(){S.exp=today();realSave();toast('Copia copiada: abre Samsung Notes, crea una nota y pega','ok');render();};if(!$('#pastetxt')){var tS=document.createElement('textarea');tS.id='pastetxt';tS.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(tS);}
-      try{navigator.clipboard.writeText(txs).then(okS,function(){var ta=$('#pastetxt');ta.value=txs;ta.select();document.execCommand('copy');ta.value='';okS();});}catch(x){var ta3=$('#pastetxt');ta3.value=txs;ta3.select();document.execCommand('copy');ta3.value='';okS();}}}
+  else if(a==='sharecopy'){if(DIRTY){toast('Guarda o cancela antes los cambios','warn');return;}var txs='SUB14COPIA:'+JSON.stringify(S);if(navigator.share){navigator.share({title:'Copia S14A '+feES(today()),text:txs}).then(function(){S.exp=today();realSave();toast('Copia enviada','ok');render();},function(e){if(!e||e.name!=='AbortError')toast('No se pudo compartir. Prueba otra vez o elige otra app.','warn');});}
+    else{var okS=function(){S.exp=today();realSave();toast('Copia copiada: abre Samsung Notes, crea una nota y pega','ok');render();};if(!$('#cliptmp')){var tS=document.createElement('textarea');tS.id='cliptmp';tS.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(tS);}
+      try{navigator.clipboard.writeText(txs).then(okS,function(){var ta=$('#cliptmp');ta.value=txs;ta.select();document.execCommand('copy');ta.value='';okS();});}catch(x){var ta3=$('#cliptmp');ta3.value=txs;ta3.select();document.execCommand('copy');ta3.value='';okS();}}}
   else if(a==='snaprest'){var sl0=snapList(),si=parseInt(b.getAttribute('data-i'),10),sv0=sl0[si];if(!sv0)return;if(!confirm('¿Volver a los datos del '+snapFecha(sv0.t)+'? Lo que tienes ahora se guarda antes como copia automática, por si te arrepientes.'))return;
     var so=JSON.parse(sv0.d);snapTake('Antes de volver al '+snapFecha(sv0.t),true);doImport(so);}
   else if(a==='mtbank'){bankOpen=!bankOpen;render();if(bankOpen){var bk=$('#banco');if(bk)bk.scrollIntoView({block:'start'});}}
@@ -2964,7 +2966,7 @@ document.addEventListener('click',function(e){
   else if(a==='obsq'){beginEdit();S.obs[S.ses]=S.obs[S.ses]||{};var oid=b.getAttribute('data-id'),ov=b.getAttribute('data-v');var orr=S.obs[S.ses][oid]=S.obs[S.ses][oid]||{};orr.e=(String(orr.e)===ov?'':ov);orr.as=true;save();render();}
   else if(a==='obsx'){var xid=b.getAttribute('data-id');obsOpen[xid]=!obsOpen[xid];render();}
   else if(a==='pick'){pickPlayer(parseInt(b.getAttribute('data-id'),10));}
-  else if(a==='copytxt'){var tx=copiaTexto(),okc=function(){toast('Copia copiada: pégala en WhatsApp','ok');if(S.tab==='inicio')render();};if(!$('#pastetxt')){var tmpta=document.createElement('textarea');tmpta.id='pastetxt';tmpta.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(tmpta);}try{navigator.clipboard.writeText(tx).then(okc,function(){var ta=$('#pastetxt');ta.value=tx;ta.select();document.execCommand('copy');ta.value='';okc();});}catch(x){var ta2=$('#pastetxt');ta2.value=tx;ta2.select();document.execCommand('copy');ta2.value='';okc();}}
+  else if(a==='copytxt'){if(DIRTY){toast('Guarda o cancela antes los cambios','warn');return;}var tx=copiaTexto(),okc=function(){toast('Copia copiada: pégala en WhatsApp','ok');if(S.tab==='inicio')render();};if(!$('#cliptmp')){var tmpta=document.createElement('textarea');tmpta.id='cliptmp';tmpta.style.cssText='position:fixed;left:-9999px;top:0';document.body.appendChild(tmpta);}try{navigator.clipboard.writeText(tx).then(okc,function(){var ta=$('#cliptmp');ta.value=tx;ta.select();document.execCommand('copy');ta.value='';okc();});}catch(x){var ta2=$('#cliptmp');ta2.value=tx;ta2.select();document.execCommand('copy');ta2.value='';okc();}}
   else if(a==='pasteimp'){try{var po=leerPegado();if(confirm('Esto sustituye todos los datos de este dispositivo por los de la copia ('+(po.players||[]).length+' jugadores). ¿Seguir?'))doImport(po);}catch(x){toast('No hay una copia válida pegada','warn');}}
   else if(a==='pastemerge'){try{doMerge(leerPegado());}catch(x){toast('No hay una copia válida pegada','warn');}}
   else if(a==='dlapp'){downloadApp();toast('Descargando entrenador_v3.html','ok');}
@@ -2975,7 +2977,7 @@ document.addEventListener('click',function(e){
   else if(a==='psort'){var sk=b.getAttribute('data-k');S.psort=(S.psort||'pos')===sk?'-'+sk:sk;save();render();}
   else if(a==='tit'){beginEdit();var tid=parseInt(b.getAttribute('data-id'),10),tt2=titulares(m),tk=tt2.indexOf(tid);if(tk>=0)tt2.splice(tk,1);else if(tt2.length<11)tt2.push(tid);else{m.err='Ya hay 11 titulares: quita uno antes.';save();render();return;}m.err=null;save();render();}
   else if(a==='pdet'){var pdid=b.getAttribute('data-id');pOpen[pdid]=!pOpen[pdid];render();}
-  else if(a==='conv'){beginEdit();var cid=parseInt(b.getAttribute('data-id'),10),cc=S.match.conv,ck=cc.indexOf(cid);if(ck>=0)cc.splice(ck,1);else{if(cc.length>=20){alert('Máximo 20 en el acta.');return;}cc.push(cid);}save();render();}
+  else if(a==='conv'){beginEdit();var cid=parseInt(b.getAttribute('data-id'),10),cc=S.match.conv,ck=cc.indexOf(cid);if(ck>=0)cc.splice(ck,1);else{if(cc.length>=20){toast('Máximo 20 en el acta','warn');return;}cc.push(cid);}save();render();}
   else if(a==='convall'){beginEdit();S.players.forEach(function(p){if(S.match.conv.indexOf(p.id)<0&&S.match.conv.length<20)S.match.conv.push(p.id);});save();render();}
   else if(a==='ptag'){beginEdit();var pt=PTAGS[parseInt(b.getAttribute('data-t'),10)];m.tags=m.tags||[];var pi2=m.tags.indexOf(pt);if(pi2>=0)m.tags.splice(pi2,1);else if(m.tags.length<3)m.tags.push(pt);save();render();}
   else if(a==='copymsg'){var ta=document.getElementById(b.getAttribute('data-w'));if(ta){var done=function(){b.textContent='Copiado ✓';setTimeout(function(){b.textContent='Copiar';},1500);};try{navigator.clipboard.writeText(ta.value).then(done,function(){ta.select();document.execCommand('copy');done();});}catch(x){ta.select();document.execCommand('copy');done();}}}
@@ -2985,14 +2987,14 @@ document.addEventListener('click',function(e){
   else if(a==='cd'){cdStart(parseInt(b.getAttribute('data-s'),10)||60,b.getAttribute('data-l')||'Cuenta atrás');}
   else if(a==='cdp'){var c0=S.cd;if(c0){if(c0.end){c0.rem=cdRem();c0.end=null;}else{c0.end=Date.now()+(c0.rem||0)*1000;c0.rem=null;}save();cdShow();if(S.tab==='sesiones'&&S.sesv==='campo')render();}}
   else if(a==='cdplus'){var c1=S.cd;if(c1){if(c1.done){c1.done=false;c1.end=Date.now()+60000;}else if(c1.end)c1.end+=60000;else c1.rem=(c1.rem||0)+60;save();cdShow();if(S.tab==='sesiones'&&S.sesv==='campo')render();}}
-  else if(a==='cdx'){if(S.cdPrev&&S.cd&&S.cd.l==='Pausa de agua'){S.cd=S.cdPrev;S.cdPrev=null;}else S.cd=null;save();cdShow();if(!S.cd&&!S.match.running)wl(false);if(S.tab==='sesiones'&&S.sesv==='campo')render();}
+  else if(a==='cdx'){if(S.cdPrev&&S.cd&&S.cd.l==='Pausa de agua'){S.cd=S.cdPrev;S.cdPrev=null;}else{S.cd=null;S.cdPrev=null;}save();cdShow();if(!S.cd&&!S.match.running)wl(false);if(S.tab==='sesiones'&&S.sesv==='campo')render();}
   else if(a==='agua'){var cA=S.cd;if(cA&&cA.l&&cA.l.indexOf('Tarea ')===0&&!cA.done){S.cdPrev={l:cA.l,dur:cA.dur,end:null,rem:cdRem(),done:false};}cdStart(60,'Pausa de agua');if(S.tab==='sesiones')render();}
   else if(a==='cdresume'){var cR=S.cdPrev;if(cR){S.cd=cR;S.cdPrev=null;S.cd.end=Date.now()+(S.cd.rem||0)*1000;S.cd.rem=null;S.cd.done=false;save();cdShow();}if(S.tab==='sesiones')render();}
   else if(a==='histdel'){if(confirm('¿Quitar este partido del historial de minutos?')){S.hist.splice(parseInt(b.getAttribute('data-i'),10),1);save();render();}}
   else if(a==='rpex'){beginEdit();if(S.rpe)delete S.rpe[b.getAttribute('data-k')];save();render();}
   else if(a==='rpesave'){if(DIRTY){saveAll();return;}save();var gb=b;gb.textContent='Guardado ✓';setTimeout(function(){gb.textContent='Guardar';},1500);}
   else if(a==='go'){if(!canLeave())return;S.tab=b.getAttribute('data-go');save();pushNav();render();window.scrollTo(0,0);}
-  else if(a==='gos'){if(!canLeave())return;S.ses=parseInt(b.getAttribute('data-i'),10);S.tab='sesiones';save();pushNav();render();window.scrollTo(0,0);}
+  else if(a==='gos'){if(!canLeave())return;var gi=parseInt(b.getAttribute('data-i'),10);if(gi!==S.ses){S.attd=null;S.sstep=0;S.sesv=null;}S.ses=gi;S.tab='sesiones';save();pushNav();render();window.scrollTo(0,0);}
   else if(a==='fopen'){if(!canLeave())return;var fidN=parseInt(b.getAttribute('data-id'),10),cambiaV=S.tab==='jug'&&S.jv!=='ficha';S.fid=S.pid=fidN;if(S.tab==='jug')S.jv='ficha';save();if(cambiaV)pushNav();render();if(cambiaV)window.scrollTo(0,0);}
   else if(a==='saveall'){var ae=document.activeElement;if(ae&&ae.blur&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName))ae.blur();setTimeout(saveAll,0);}
   else if(a==='cancelall'){cancelAll();}
@@ -3003,13 +3005,13 @@ document.addEventListener('click',function(e){
   else if(a==='entadd'){
     var rs2=[];document.querySelectorAll('textarea[data-er]').forEach(function(x){rs2.push(x.value.trim());});
     var ac=($('#eacu')||{}).value||'';
-    if(!rs2.some(function(x){return x;})&&!ac.trim()){alert('Escribe al menos una nota.');return;}
+    if(!rs2.some(function(x){return x;})&&!ac.trim()){toast('La entrevista está vacía','warn');return;}
     ensureF(S.fid).ent.push({f:($('#ef')||{}).value||today(),r:rs2,acuerdo:ac.trim(),prox:($('#eprox')||{}).value||''});save();render();
   }else if(a==='entdel'){if(confirm('¿Quitar esta entrevista?')){ensureF(S.fid).ent.splice(parseInt(b.getAttribute('data-i'),10),1);save();render();}}
-  else if(a==='resetpos'){S.lineup.pos={};save();render();}
+  else if(a==='resetpos'){beginEdit();S.lineup.pos={};save();render();}
   else if(a==='start'){
     var on=titulares(m).slice();
-    if(on.length!==11){m.err='Tienen que ser 11 titulares convocados (ahora '+on.length+').';save();render();return;}
+    if(on.length<7||on.length>11){m.err='Titulares: entre 7 y 11 (ahora '+on.length+').';save();render();return;}
     m.err=null;
     var rv=$('#rival');if(rv)m.rival=rv.value;
     m.on=on;m.tit0=on.slice();m.fecha=today();m.wins=[];m.win=null;m.secs={};m.conv.forEach(function(id){m.secs[id]=0;});m.phase='h1';m.running=true;m.t=0;m.lastTs=Date.now();wl(true);m.ocas=0;m.activa=false;m.log=[];save();render();
@@ -3028,7 +3030,7 @@ document.addEventListener('click',function(e){
   }else if(a==='savematch'){
     var rs=$('#res');m.res=rs?rs.value:'';
     cerrarVentana(m);S.hist.push({fecha:m.fecha||today(),rival:m.rival,res:m.res,secs:m.secs,tags:m.tags||[],ev:m.ev||{},ind:m.ind||{},conv:m.conv.slice(),tit:m.tit0||[],wins:m.wins||[],log:m.log||[]});S.match=newMatch();if(DIRTY)saveAll();else save();snapTake('Partido guardado',true);toast('Partido guardado en Historial','ok');render();
-  }else if(a==='newmatch'){if(confirm('¿Descartar este partido? Se pierden sus minutos y cambios y no se guarda en el Historial.')){S.match=newMatch();if(!S.cd)wl(false);save();render();window.scrollTo(0,0);toast('Partido descartado. Puedes preparar otro.','info');}}
+  }else if(a==='newmatch'){if(confirm('¿Descartar este partido? Se pierden sus minutos y cambios y no se guarda en el Historial.')){S.match=newMatch();if(SNAP){try{var oN=JSON.parse(SNAP);oN.match=S.match;SNAP=JSON.stringify(oN);localStorage.setItem(KEY,SNAP);}catch(x){}}if(!S.cd)wl(false);save();render();window.scrollTo(0,0);toast('Partido descartado. Puedes preparar otro.','info');}}
 });
 document.addEventListener('change',function(e){
   var t=e.target;
@@ -3050,7 +3052,7 @@ document.addEventListener('change',function(e){
   if(t.hasAttribute('data-f')){var p=P(parseInt(t.getAttribute('data-id'),10));if(p){p[t.getAttribute('data-f')]=t.value;save();if(t.getAttribute('data-f')==='sprint'||t.getAttribute('data-f')==='d'||t.getAttribute('data-f')==='n')render();}return;}
   if(t.hasAttribute('data-conv')){
     var id=parseInt(t.getAttribute('data-conv'),10),c=S.match.conv,k=c.indexOf(id);
-    if(t.checked){if(c.length>=20){t.checked=false;alert('Máximo 20 en el acta.');return;}if(k<0)c.push(id);}else if(k>=0)c.splice(k,1);
+    if(t.checked){if(c.length>=20){t.checked=false;toast('Máximo 20 en el acta','warn');return;}if(k<0)c.push(id);}else if(k>=0)c.splice(k,1);
     save();render();return;
   }
   if(t.hasAttribute('data-obs')){
