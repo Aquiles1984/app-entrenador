@@ -1058,10 +1058,10 @@ function vVentana(m){
 }
 function pickPlayer(id){
   var m=S.match;if(m.phase==='pre'||m.phase==='fin')return;
+  if(!(m.phase==='desc'||m.activa)){pickOut=null;liveUpdate();toast('Abre una ventana de cambio antes («Abrir ventana»).','warn');return;}
   var on=m.on.indexOf(id)>=0;
   if(on){pickOut=(pickOut===id?null:id);if(pickOut)toast('Sale '+nm(id)+'. Ahora toca quién entra.','info');liveUpdate();return;}
   if(!pickOut){toast('Primero toca al jugador del campo que sale.','info');return;}
-  if(!(m.phase==='desc'||m.activa)){toast('Abre una ventana de cambio antes.','warn');return;}
   doSwap(pickOut,id);
 }
 function liveUpdate(){
@@ -2915,11 +2915,11 @@ document.addEventListener('click',function(e){
     var rv=$('#rival');if(rv)m.rival=rv.value;
     m.on=on;m.tit0=on.slice();m.fecha=today();m.wins=[];m.win=null;m.secs={};m.conv.forEach(function(id){m.secs[id]=0;});m.phase='h1';m.running=true;m.t=0;m.lastTs=Date.now();wl(true);m.ocas=0;m.activa=false;m.log=[];save();render();
   }else if(a==='toggle'){tick();m.running=!m.running;m.lastTs=Date.now();wl(m.running);save();render();}
-  else if(a==='desc'){tick();wl(false);cerrarVentana(m);m.phase='desc';m.running=false;m.activa=false;m.t=Math.max(m.t,35*60);m.log.push('Descanso');m.win={n:'Descanso',t:"35'",ch:[]};save();render();}
+  else if(a==='desc'){tick();wl(false);cerrarVentana(m);pickOut=null;m.phase='desc';m.running=false;m.activa=false;m.t=Math.max(m.t,35*60);m.log.push('Descanso');m.win={n:'Descanso',t:"35'",ch:[]};save();render();}
   else if(a==='h2'){cerrarVentana(m);m.phase='h2';m.running=true;m.t=35*60;m.lastTs=Date.now();wl(true);save();render();}
   else if(a==='fin'){tick();wl(false);cerrarVentana(m);m.phase='fin';m.running=false;m.activa=false;save();render();}
-  else if(a==='abrir'){if(m.ocas<3){tick();m.ocas++;m.activa=true;m.win={n:m.ocas,t:mm(m.t),ch:[]};m.log.push(mm(m.t)+' se abre la ventana de cambio '+m.ocas);save();render();}}
-  else if(a==='cerrar'){cerrarVentana(m);m.activa=false;save();render();}
+  else if(a==='abrir'){if(m.ocas<3){tick();pickOut=null;m.ocas++;m.activa=true;m.win={n:m.ocas,t:mm(m.t),ch:[]};m.log.push(mm(m.t)+' se abre la ventana de cambio '+m.ocas);save();render();}}
+  else if(a==='cerrar'){cerrarVentana(m);pickOut=null;m.activa=false;save();render();}
   else if(a==='undoswap'){deshacerCambio(parseInt(b.getAttribute('data-k'),10));}
   else if(a==='histopen'){histOpen=(histOpen===b.getAttribute('data-i')?null:b.getAttribute('data-i'));render();}
   else if(a==='swap'){
