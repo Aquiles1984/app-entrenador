@@ -326,7 +326,7 @@ header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!im
 </head>
 <body>
 <header>
-  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.27</span></h1>
+  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.28</span></h1>
   <p class="priv">Datos de menores: se guardan solo en este dispositivo. No subir este archivo ni las copias de seguridad a ningún servicio.</p>
 </header>
 <nav id="tabs"></nav>
@@ -1527,6 +1527,9 @@ function newUserSession(base){
 }
 /* Propuestas de cambio en las sesiones fijas: el entrenador las acepta o las rechaza; nada cambia sin su visto bueno */
 var PROPS={
+ 0:{t:'Llegada a las 19:30 y charla de presentación',tareas:['s0t0','s0t1','s0t2'],
+  ini:"19:30 en el vestuario, 10-12 min, sentados en círculo y móviles en la mochila. 1) Quién soy (1'): tu nombre, que a partir de hoy eres su entrenador, con tu ayudante y con el coordinador. 2) Lo que os pido (2'): esfuerzo con y sin balón; hablar y ayudarse, nadie se queda solo; aprender cada día, sin hablar de clasificación. 3) Lo de ayer (2'): «en la segunda parte, cuando estuvimos juntos y nos ayudamos por el medio, competimos: marcamos y tuvimos ocasiones; eso es lo que vamos a entrenar». Sin nombres, sin culpables y sin hablar del sistema ni de quién dirigía. 4) Normas (4'): puntualidad y avisar si no vienes; respeto a todos, también en los grupos de WhatsApp; móvil en la mochila y sin fotos de compañeros; ducha y vestuario limpio; mi compromiso: sin gritos ni humillaciones y corregir en privado; minutos: todos los convocados juegan y los minutos dependen de asistencia, esfuerzo y rendimiento. Pregunta: «¿qué norma añadiríais vosotros?» y apunta 1 o 2. 5) Cierre (1'): «pensad qué queréis mejorar esta temporada; me lo diréis en una charla de 5 minutos». Grito de equipo y al campo.",
+  cambios:['Los jugadores llegan a las 19:30 (no a las 19:50) y la charla en el vestuario pasa de 6 a 10-12 minutos, con las normas básicas. El guion completo está en «Más información» › Charla inicial.','Sin cambios: rondo y circuito, bloque defensivo 4-2-3-1, partido 9v9 y final.','Consigna del bloque, por lo visto en Taradell: «quien está más cerca aprieta al que recibe; nadie recibe de cara solo».']},
  2:{t:'Adaptación a 1/4 de campo',ca:'1/4 de campo',idea:'Transiciones',tareas:['s2t0','s2t1','x20','x21'],
   cambios:['Tarea 3: «Recuperar y salir en 3 pases» pasa de 40x35 m a 1/4 de campo, con 6 defendiendo contra 5 y rotación de los que esperan.',"Tarea 4: el 7v7 en 40x35 m y el 9v9 en medio campo se cambian por un 6v6 con porteros en 1/4 de campo (22').",'Sin cambios: rondo, oleadas de centros y final.','En 1/4 de campo no cabe un partido con el once completo: el once del sábado lo decides con lo que veas el lunes y el martes.']},
  3:{t:'Basculación en bloque (decídelo después de Torelló)',ca:'Medio campo',idea:'Defender cerrados',tareas:['s3t0','x32','x33','s3t3'],
@@ -1535,7 +1538,7 @@ var PROPS={
  4:{t:'Adaptación a 1/4 de campo',ca:'1/4 de campo',idea:'Defender cerrados',tareas:['s4t0','s4t1','s4t2','x22'],
   cambios:['Tarea 4: el «Ensayo del partido» con 9v9 en 40x35 m pasa a un ensayo defensivo 7 contra 6 (portero, línea de 4 y pivotes del once previsto) y un 6v6 con porteros, todo en 1/4 de campo.','Sin cambios: rondo, 3v3+2, duelos aéreos y final.']}
 };
-function propU(i){var of=ORIGF[i],p=PROPS[i],fp=of.fe.split('/');return {id:'o'+i,fe:fp[2]+'-'+fp[1]+'-'+fp[0],ca:p.ca||of.ca,idea:p.idea||IDEAMAP[i]||'',ob:of.ob,mat:p.mat||of.mat,ini:of.ini,fin:of.fin,tareas:p.tareas.map(function(r){return {ref:r};})};}
+function propU(i){var of=ORIGF[i],p=PROPS[i],fp=of.fe.split('/');return {id:'o'+i,fe:fp[2]+'-'+fp[1]+'-'+fp[0],ca:p.ca||of.ca,idea:p.idea||IDEAMAP[i]||'',ob:of.ob,mat:p.mat||of.mat,ini:p.ini||of.ini,fin:of.fin,tareas:p.tareas.map(function(r){return {ref:r};})};}
 function propPend(i){return !!(PROPS[i]&&ORIGF&&ORIGF[i]&&!(S.sprop||{})[i]);}
 function sinValidar(i){return NBASE!==null&&i<NBASE&&!!(ORIGF&&ORIGF[i])&&!(S.sval||{})[i];}
 function vValida(i){
