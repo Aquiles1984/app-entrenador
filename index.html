@@ -312,7 +312,7 @@ header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!im
 </head>
 <body>
 <header>
-  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.25</span></h1>
+  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.26</span></h1>
   <p class="priv">Datos de menores: se guardan solo en este dispositivo. No subir este archivo ni las copias de seguridad a ningún servicio.</p>
 </header>
 <nav id="tabs"></nav>
@@ -1260,8 +1260,8 @@ function vHistorial(){
   h+='<div class="card"><h2>Partidos</h2>'+(H.length?H.map(function(x,i){return {x:x,i:i};}).reverse().map(function(o){
     var x=o.x,i=o.i,op=histOpen===String(i);
     var cj=CALF.filter(function(c){return c[1]===x.fecha&&c[4]===rivalNombre(x.rival);})[0],vx=calVED(x.res),HCOL={V:'#067647',E:'#b58100',D:'#d92d20'};
-    var r='<div class="tsum" data-act="histopen" data-i="'+i+'" style="cursor:pointer"><span class="n">'+(cj?'J'+cj[0]:(i+1))+'</span><div style="flex:1;min-width:0"><b>'+(cj?(cj[3]==='Casa'?'🏠 ':'✈️ '):'')+esc(x.rival||'Rival')+'</b><span class="note">'+esc(feES(x.fecha)||'sin fecha')+' · '+((x.conv&&x.conv.length)||Object.keys(x.secs||{}).length)+' convocados</span></div>'+
-     (x.res?'<b style="min-width:52px;text-align:center;padding:4px 8px;border-radius:8px;color:#fff;background:'+(HCOL[vx]||'#888')+'">'+esc(x.res)+'</b>':'')+'<span class="note">'+(op?'▴':'▾')+'</span></div>';
+    var r='<div class="tsum" data-act="histopen" data-i="'+i+'" style="cursor:pointer"><span class="n">'+(cj?'J'+cj[0]:(i+1))+'</span><div style="flex:1;min-width:0"><b>'+(cj?(cj[3]==='Casa'?'🏠 ':'✈️ '):'')+esc(x.rival||'Rival')+'</b><span class="note">'+esc(feES(x.fecha)||'sin fecha')+' · '+((x.conv&&x.conv.length)||Object.keys(x.secs||{}).length)+' convocados</span>'+(x.res&&!vx?'<span class="note" style="color:#d92d20">⚠ Resultado no válido</span>':'')+'</div>'+
+     (vx?'<b style="min-width:52px;text-align:center;padding:4px 8px;border-radius:8px;color:#fff;background:'+HCOL[vx]+'">'+esc(x.res.trim())+'</b>':'<b style="min-width:52px;text-align:center;padding:4px 8px;border-radius:8px;color:#fff;background:#888">–</b>')+'<span class="note">'+(op?'▴':'▾')+'</span></div>';
     if(op){
       var ids=Object.keys(x.secs||{}).map(Number).sort(function(a,b){return (x.secs[b]||0)-(x.secs[a]||0);});
       var cvx=(x.conv||[]).filter(function(id){return !(x.baja||{})[id];});
@@ -3175,7 +3175,7 @@ document.addEventListener('click',function(e){
   else if(a==='ceno'){CED=null;CEH=null;HMO=null;render();}
   else if(a==='hnoconv'){if(!HMO)return;var hp=parseInt(($('#hncP')||{}).value,10),hm=($('#hncM')||{}).value;if(!hp||!hm)return;HMO.conv=HMO.conv.filter(function(x){return x!==hp;});HMO.noconv[hp]=hm;delete HMO.secs[hp];renderKeep();}
   else if(a==='cetit'){var to=parseInt(($('#cetO')||{}).value,10),tn=parseInt(($('#cetN')||{}).value,10);if(to&&tn){CEDT[CEDT.indexOf(to)]=tn;renderKeep();}}
-  else if(a==='ceapply'){if(CEH!==null){var hx2=S.hist[CEH];if(!hx2)return;beginEdit();cedApply(HMO);if(!CED){hx2.wins=HMO.wins;hx2.secs=HMO.secs;hx2.tit=HMO.tit0.slice();hx2.baja=HMO.baja;hx2.res=HMO.res;hx2.noconv=HMO.noconv;hx2.conv=HMO.conv.slice();if(!(hx2.conv&&hx2.conv.length))hx2.conv=HMO.conv.slice();CEH=null;HMO=null;save();render();toast('Partido corregido. Pulsa Guardar.','info');}return;}
+  else if(a==='ceapply'){if(CEH!==null){var hx2=S.hist[CEH];if(!hx2)return;if(HMO.res&&!calVED(HMO.res)){toast('Resultado: nosotros-ellos, por ejemplo 1-6','warn');return;}beginEdit();cedApply(HMO);if(!CED){hx2.wins=HMO.wins;hx2.secs=HMO.secs;hx2.tit=HMO.tit0.slice();hx2.baja=HMO.baja;hx2.res=HMO.res;hx2.noconv=HMO.noconv;hx2.conv=HMO.conv.slice();if(!(hx2.conv&&hx2.conv.length))hx2.conv=HMO.conv.slice();CEH=null;HMO=null;save();render();toast('Partido corregido. Pulsa Guardar.','info');}return;}
     var ma=S.match;cedApply(ma);if(!CED){save();render();window.scrollTo(0,0);toast('Cambios corregidos: minutos recalculados','ok');}}
   else if(a==='cewadd'){var mw=S.match;CED.push({n:'x',t:Math.max(1,Math.floor(mw.t/60))+"'",ch:[{o:0,n:0}]});renderKeep();}
   else if(a==='cedadd'){CED.push({n:'Descanso',t:"35'",ch:[{o:0,n:0}]});renderKeep();}
@@ -3238,7 +3238,7 @@ document.addEventListener('click',function(e){
     if(!o||!n)return;
     doSwap(o,n);
   }else if(a==='savematch'){
-    var rs=$('#res');m.res=rs?rs.value:'';
+    var rs=$('#res');m.res=rs?rs.value.trim():'';if(m.res&&!calVED(m.res)){toast('Resultado: nosotros-ellos, por ejemplo 1-6','warn');return;}
     cerrarVentana(m);S.hist.push({fecha:m.fecha||today(),rival:m.rival,res:m.res,secs:m.secs,tags:m.tags||[],ev:m.ev||{},ind:m.ind||{},conv:m.conv.slice(),noconv:(function(){var o={};Object.keys(m.noconv||{}).forEach(function(k){if(m.conv.indexOf(+k)<0)o[k]=m.noconv[k];});return o;})(),tit:m.tit0||[],baja:m.baja||{},cap:m.cap||null,wins:m.wins||[],log:m.log||[]});CED=null;S.match=newMatch();if(DIRTY)saveAll();else save();snapTake('Partido guardado',true);toast('Partido guardado en Historial','ok');render();
   }else if(a==='newmatch'){if(confirm('¿Descartar este partido? Se pierden sus minutos y cambios y no se guarda en el Historial.')){S.match=newMatch();CED=null;if(SNAP){try{var oN=JSON.parse(SNAP);oN.match=S.match;SNAP=JSON.stringify(oN);localStorage.setItem(KEY,SNAP);}catch(x){}}if(!S.cd)wl(false);save();render();window.scrollTo(0,0);toast('Partido descartado. Puedes preparar otro.','info');}}
 });
