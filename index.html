@@ -326,7 +326,7 @@ header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!im
 </head>
 <body>
 <header>
-  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.39</span></h1>
+  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.40</span></h1>
   <p class="priv">Datos de menores: se guardan solo en este dispositivo. No subir este archivo ni las copias de seguridad a ningún servicio.</p>
 </header>
 <nav id="tabs"></nav>
@@ -752,7 +752,7 @@ function render(){
   normTab();
   syncUserSessions();
   renderTabs();
-  var v=$('#view');v.className='t-'+S.tab;
+  var v=$('#view'),scX=v.getAttribute('data-vt')===S.tab?[].slice.call(v.querySelectorAll('.sc')).map(function(e){return e.scrollLeft;}):[];v.className='t-'+S.tab;v.setAttribute('data-vt',S.tab);
   if(S.tab==='inicio')v.innerHTML=vInicio();
   else if(S.tab==='plantilla')v.innerHTML=vPlantilla();
   else if(S.tab==='pizarra'){v.innerHTML=vPizarra();drawBoard();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){if(S.tab==='pizarra')drawBoard();});}
@@ -780,6 +780,8 @@ function render(){
   else if(S.tab==='historial')v.innerHTML=vHistorial();
   else v.innerHTML=vPend();
   if(S.tab!=='inicio')pageHead(v);
+  [].slice.call(v.querySelectorAll('.sc')).forEach(function(e,k){if(scX[k])e.scrollLeft=scX[k];});
+  [].slice.call(v.querySelectorAll('.schips')).forEach(function(sc){var on=sc.querySelector('.on');if(!on)return;var d=on.getBoundingClientRect().left-sc.getBoundingClientRect().left;sc.scrollLeft+=d-(sc.clientWidth-on.offsetWidth)/2;});
   if(['inicio','partido','pizarra','plantilla','sesiones','fichas','pi','mas'].indexOf(S.tab)<0)accordionize(v);
   if(S.cd)cdShow();
 }
