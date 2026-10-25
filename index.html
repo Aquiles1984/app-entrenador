@@ -326,7 +326,7 @@ header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!im
 </head>
 <body>
 <header>
-  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.32</span></h1>
+  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.33</span></h1>
   <p class="priv">Datos de menores: se guardan solo en este dispositivo. No subir este archivo ni las copias de seguridad a ningún servicio.</p>
 </header>
 <nav id="tabs"></nav>
@@ -1127,7 +1127,7 @@ var TL=[
  [0,'Inicio del partido','Reloj de la app en marcha desde «Empezar».']
 ];
 function vTimeline(){
-  var pm=null;for(var j=0;j<CALISO.length;j++){if(dias(new Date(CALISO[j][0]+'T00:00:00'))>=0){pm=CALISO[j];break;}}
+  var pm=null;for(var j=0;j<CALISO.length;j++){if(dias(new Date(CALISO[j][0]+'T00:00:00'))>=0&&!calJugado(CALISO[j][0])){pm=CALISO[j];break;}}
   var ko=S.tlh||(pm?pm[1]:'13:45'),p=ko.split(':'),base=(parseInt(p[0],10)||0)*60+(parseInt(p[1],10)||0),tl=S.match.tl||{};
   function hh(mn){mn=(mn+1440)%1440;return ('0'+Math.floor(mn/60)).slice(-2)+':'+('0'+mn%60).slice(-2);}
   return '<details class="acc"><summary>🕒 Cronología de la previa</summary><div class="in">'+
@@ -1176,7 +1176,8 @@ var pickOut=null,histOpen=null;
 function rivalNombre(s){return String(s||'').replace(/\s*\(.*$/,'').replace(/\s*·.*$/,'').trim();}
 function rivalOpts(m){
   var lst=[];CAL.forEach(function(c){var r=rivalNombre(c[4]);if(r&&lst.indexOf(r)<0)lst.push(r);});
-  if(!m.rival){for(var j=0;j<CALISO.length;j++){if(dias(new Date(CALISO[j][0]+'T00:00:00'))>=0){m.rival=rivalNombre(CALISO[j][3]);break;}}}
+  if(m.phase==='pre'&&!m.conv.length&&m.rival&&CALF.some(function(c){return rivalNombre(c[4])===m.rival;})){var nxr=null;for(var jx=0;jx<CALISO.length;jx++){if(dias(new Date(CALISO[jx][0]+'T00:00:00'))>=0&&!calJugado(CALISO[jx][0])){nxr=rivalNombre(CALISO[jx][3]);break;}}if(nxr&&nxr!==m.rival)m.rival='';}
+  if(!m.rival){for(var j=0;j<CALISO.length;j++){if(dias(new Date(CALISO[j][0]+'T00:00:00'))>=0&&!calJugado(CALISO[j][0])){m.rival=rivalNombre(CALISO[j][3]);break;}}}
   if(m.rival&&lst.indexOf(m.rival)<0)lst.unshift(m.rival);
   return '<option value="">— Elige rival —</option>'+lst.map(function(r){return '<option'+(r===m.rival?' selected':'')+'>'+esc(r)+'</option>';}).join('')+'<option value="Amistoso">Amistoso</option>';
 }
@@ -2403,6 +2404,7 @@ function vPlanOld(){
 }
 
 /* ---------- Inicio ---------- */
+function calJugado(iso){var c=CALF.filter(function(x){return x[1]===iso;})[0];return !!(c&&typeof calRes==='function'&&calRes(c));}
 var CALISO=CALF.slice().sort(function(a,b){return a[1]<b[1]?-1:1;}).map(function(c){return [c[1],c[2],c[3],c[4]+(CALNOTA[c[0]]?' · '+(CALNOTA[c[0]]==='aplazado'?'partido aplazado':CALNOTA[c[0]]):'')];});
 function dparse(s){var p=s.split('/');return new Date(+p[2],+p[1]-1,+p[0]);}
 function dias(d){var n=new Date();n.setHours(0,0,0,0);return Math.round((d-n)/86400000);}
@@ -2411,7 +2413,7 @@ function vInicio(){
   var ns=-1,i,j,h0='';
   var bd=1e9;Object.keys(FICH).forEach(function(k){var f0=FICH[k];if(!f0||f0.del)return;var dd=dias(dparse(f0.fe));if(dd>=0&&dd<bd){bd=dd;ns=parseInt(k,10);}});
   var pm=null;
-  for(j=0;j<CALISO.length;j++){if(dias(new Date(CALISO[j][0]+'T00:00:00'))>=0){pm=CALISO[j];break;}}
+  for(j=0;j<CALISO.length;j++){if(dias(new Date(CALISO[j][0]+'T00:00:00'))>=0&&!calJugado(CALISO[j][0])){pm=CALISO[j];break;}}
   var open=0,total=0,lst=[];
   var mI=S.match;if(mI&&mI.phase&&mI.phase!=='pre'){var fI=mI.phase==='fin';h0+='<div class="warn" style="font-size:15px">⏱ '+(fI?'Hay un partido terminado <b>sin guardar</b>':'Hay un partido <b>en marcha</b>')+(mI.rival?' contra '+esc(mI.rival):'')+'. <button class="b" data-act="go" data-go="partido" style="margin-top:6px">Ir al partido</button></div>';}
   TODO.forEach(function(g){g[1].forEach(function(it){total++;if(!S.todo[it[0]]){open++;if(lst.length<5)lst.push(it[1]);}});});
