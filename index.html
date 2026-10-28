@@ -344,7 +344,7 @@ header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!im
 </head>
 <body>
 <header>
-  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.80</span></h1>
+  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.81</span></h1>
   <p class="priv">Datos de menores: se guardan solo en este dispositivo. No subir este archivo ni las copias de seguridad a ningún servicio.</p>
 </header>
 <nav id="tabs"></nav>
@@ -492,7 +492,7 @@ function isEditField(t){
   if(!t||!/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))return false;
   if(t.type==='checkbox'||t.type==='file')return false;
   if(t.id==='ses'||t.id==='imp'||t.id==='impm'||t.id==='pastetxt'||t.id==='rival'||t.id==='out'||t.id==='in')return false;
-  if(t.hasAttribute('data-sync')||t.hasAttribute('data-attd')||t.hasAttribute('data-tlh')||t.hasAttribute('data-ncm')||t.hasAttribute('data-mq')||t.hasAttribute('data-cap')||t.hasAttribute('data-ce')||t.id==='bjp'||t.id==='bjm'||t.id==='cetO'||t.id==='cetN'||t.id==='hncP'||t.id==='hncM'||t.hasAttribute('data-hres')||t.hasAttribute('data-pbsel')||t.hasAttribute('data-pbt')||t.hasAttribute('data-pbf')||t.hasAttribute('data-pbp')||t.id==='fcfpaste'||/^(lf|lj|lt|lz|ld|tf|tt|tv|pgf|pv[0-2])$/.test(t.id)||t.hasAttribute('data-les'))return false;
+  if(t.hasAttribute('data-sync')||t.hasAttribute('data-attd')||t.hasAttribute('data-tlh')||t.hasAttribute('data-ncm')||t.hasAttribute('data-mq')||t.hasAttribute('data-cap')||t.hasAttribute('data-ce')||t.id==='bjp'||t.id==='bjm'||t.id==='cetO'||t.id==='cetN'||t.id==='hncP'||t.id==='hncM'||t.hasAttribute('data-hres')||t.hasAttribute('data-pbsel')||t.hasAttribute('data-pbt')||t.hasAttribute('data-pbf')||t.hasAttribute('data-pbp')||t.id==='fcfpaste'||/^(lf|lj|lt|lz|ld|tf|tt|tv|pgf|pv[0-2]|tpx|tpf|tpt|tpj\d+)$/.test(t.id)||t.hasAttribute('data-les'))return false;
   return !!(t.closest&&t.closest('#view'));
 }
 document.addEventListener('change',function(e){if(isEditField(e.target)){if(!DIRTY)SNAP=JSON.stringify(S);commitDraft();HOLD=true;setTimeout(function(){HOLD=false;},0);}},true);
