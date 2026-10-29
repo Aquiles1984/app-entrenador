@@ -344,7 +344,7 @@ header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!im
 </head>
 <body>
 <header>
-  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.85</span></h1>
+  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.86</span></h1>
   <p class="priv">Datos de menores: se guardan solo en este dispositivo. No subir este archivo ni las copias de seguridad a ningún servicio.</p>
 </header>
 <nav id="tabs"></nav>
@@ -2290,7 +2290,7 @@ var FICH={
 var HOY={
  0:{q:'Defender juntos: el bloque se mueve a la vez con el balón y las líneas están cerca.',p:'En Taradell, al perder el balón todos corrían detrás y nadie paraba al que lo llevaba. Juntos y cerca nos ayudamos y robamos más.',w:'«¡Juntos!»',f:'¿A qué distancia tienen que estar las líneas? (10-12 m)'},
  1:{q:'Defender el 1 contra 1 y ayudarse: uno aprieta y el otro cubre; y reaccionar en 5 segundos al perder.',p:'Es la base de defender juntos: si el primero aprieta solo y nadie le cubre, nos superan con un regate.',w:'«¡Salgo!» y «¡Te cubro!»',f:'¿Qué hace el segundo cuando el primero sale a apretar?'},
- 2:{q:'Robar y atacar rápido, y llegar al área con gente.',p:'El sábado jugamos contra el Torelló. Los goles más fáciles llegan justo después de robar, cuando el rival está desordenado.',w:'«¡5 segundos!» y «¡Rápido!»',f:'¿Qué hacemos en los 5 segundos después de perder? ¿Y después de robar?'},
+ 2:{q:'Atacar rápido, antes de que se coloquen, y que su 10 no gire.',p:'El sábado jugamos contra el Torelló, que defiende muy bien y tiene un 10 que mueve al equipo. Si atacamos antes de que se coloquen y su 10 no puede girarse, les cuesta mucho.',w:'«¡Rápido!» y «¡Su 10 no gira!»',f:'¿Cuándo es más fácil marcar a un equipo que defiende bien? ¿Qué hacemos cuando su 10 recibe?'},
  3:{q:'Salir jugando desde atrás sin perder el balón, y seguir defendiendo juntos.',p:'Si sacamos el balón jugado, atacamos mejor y corremos menos detrás del balón.',w:'«¡Sal jugando!»',f:'¿Dónde se ofrece el pivote cuando el central tiene el balón?'},
  4:{q:'Preparar Centelles: el bloque junto y el balón parado, sin cansarnos.',p:'Jugamos el jueves en Centelles y el sábado en Cardedeu: hoy ensayamos y cuidamos las piernas.',w:'«¡Juntos!»',f:'¿Qué hace cada uno en un córner en contra?'},
  6:{q:'Perfilarse: antes de recibir, mirar y ponerse de lado para ver todo el campo.',p:'Cuando recibimos de espaldas, el rival nos aprieta y perdemos el balón. Si hemos mirado y estamos de lado, jugamos rápido al lado libre.',w:'«¡Perfil!»',f:'¿Qué has visto antes de que te llegara el balón?'},
@@ -2301,7 +2301,7 @@ var HOY={
  11:{q:'Repasar lo de estas 4 semanas y ensayar el partido del domingo.',p:'El domingo jugamos contra el Vallès B. Juntar las dos ideas: defender juntos y perfilarse para recibir.',w:'«¡Perfil!» y «¡Juntos!»',f:'¿Qué hemos aprendido en estas 4 semanas?'}};
 Object.keys(HOY).forEach(function(k){if(FICH[k])FICH[k].hoy=HOY[k];});
 function fasesHoy(f){var n=f.tareas.length,L=[];if(!n)return L;
-  L.push(['Calentamos',f.tareas[0].t]);if(n>2)L.push(['Aprendemos',f.tareas.slice(1,n-1).map(function(t){return t.t;}).join(' · ')]);if(n>1)L.push(['Jugamos',f.tareas[n-1].t]);if(f.fin)L.push(['Cerramos','balón parado, estiramientos y la pregunta del día']);return L;}
+  L.push(['Calentamos',f.tareas[0].t]);if(n>2)L.push(['Aprendemos',f.tareas.slice(1,n-1).map(function(t){return t.t;}).join(' · ')]);if(n>1)L.push(['Jugamos',f.tareas[n-1].t]);if(f.fin)L.push(['Cerramos',(/córner|falta|saque de banda|penalti|barrera|balón parado/i.test(f.fin)?'balón parado, ':'')+'vuelta a la calma y la pregunta del día']);return L;}
 function montajeL(f){var L=(f&&f.tareas||[]).map(function(t,k){return [(k+1)+' · '+t.t,t.es||''];});if(f&&f.bpm)L.push(['Final · balón parado','el área de fútbol 11 con 8 platillos delante de la portería de fútbol 7']);return L;}
 function vMontaje(f,abierto){var L=montajeL(f);if(!L.length)return '';var ul='<ul style="margin:6px 0 0">'+L.map(function(x){return '<li><b>'+esc(x[0])+':</b> '+esc(x[1])+'</li>';}).join('')+'</ul>';
   if(abierto)return '<div class="card"><h2>🧱 Montaje antes de empezar</h2>'+ul+'</div>';
