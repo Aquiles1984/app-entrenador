@@ -344,7 +344,7 @@ header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!im
 </head>
 <body>
 <header>
-  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.82</span></h1>
+  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.83</span></h1>
   <p class="priv">Datos de menores: se guardan solo en este dispositivo. No subir este archivo ni las copias de seguridad a ningún servicio.</p>
 </header>
 <nav id="tabs"></nav>
@@ -1402,7 +1402,7 @@ function bank(){
 function bankGet(ref){var x=/^x(\d+)$/.exec(ref||'');if(x)return BANCO_X[+x[1]]||null;var m=/^s(\d+)t(\d+)$/.exec(ref||'');if(!m)return null;var f=(ORIGF&&ORIGF[+m[1]])||FICH[+m[1]];return f&&f.tareas[+m[2]]||null;}
 function refTipo(ref){var x=/^x(\d+)$/.exec(ref||'');if(x)return (BANCO_X[+x[1]]||{}).tipo;var m=/^s(\d+)t(\d+)$/.exec(ref||'');return m?bankTipo(+m[1],+m[2]):null;}
 function finMin(x){var m=/^\s*(\d+)\s*(min|')/.exec(x||'');return m?parseInt(m[1],10):8;}
-/* Vídeos de ejercicios por tarea (enlaces comprobados el 25/10/2026; título y canal de YouTube) */
+/* Vídeos de ejercicios por tarea (enlaces comprobados el 25/10/2026; título y canal de YouTube). Los de transiciones de Sergio Aracil, DR.SPORTS y Coaching fútbol los mandó Adrián el 29/10/2026 */
 var VIDT=[
  [/Rondos 4v2 y velocidad/,[['Rondo 4v1 que pasa a 4v2','tVLvcvu7Szc','LevelUp Coach'],['Circuito de coordinación con escalera','GNTgBDPnNhI','Niños del Futbol'],['Fuerza, equilibrio y propiocepción (FIFA+)','KWWOmILx49k','Joaquín Caparrós']]],
  [/Bloque defensivo/,[['Basculación para fútbol base','LJYI3g2epNA','F de Fútbol'],['Basculaciones defensivas en fútbol 11','eQ8CSYFQ9bQ','La pizarra de Toque']]],
@@ -1413,7 +1413,8 @@ var VIDT=[
  [/2v2 con apoyo|Saltar o esperar|uno aprieta y el otro cubre/,[['Ayudas permanentes y coberturas','dLGlVKMOtSA','FutbolmasQpartidos'],['Uno presiona y el otro cubre (inglés)','IHeUKdsVHHg','KS Performance']]],
  [/4v4\+3/,[['Juego de posición 4v4+3','fyZaHKSJ9hc','fiebreFútbol TV'],['4v4+3 con 3 zonas','mC_BsC1Y57Q','Marcos Reina']]],
  [/Oleadas con centros|Centros? y remate/,[['Centro y remate en fútbol base','XtXNAxuoD2Y','BaseFútbol'],['Mantenimiento, centros y remates','VF8AHQCMHqo','Coaching fútbol']]],
- [/Recuperar y salir en 3 pases|Tras robo, ataque|robar y atacar/,[['Transición ofensiva y contraataque','JrcWBRsb6FA','Fútbol Dinámico'],['Transiciones defensa-ataque','dWy0z6hPzvE','Next Level Football Academy']]],
+ [/Recuperar y salir en 3 pases|Tras robo, ataque|robar y atacar/,[['Transición ofensiva y contraataque','JrcWBRsb6FA','Fútbol Dinámico'],['Transiciones defensa-ataque','dWy0z6hPzvE','Next Level Football Academy'],['Ataque contra defensa con presión por detrás (+ variante)','w_LyJpJ2J-U','Sergio Aracil'],['Transición en espacio reducido (short)','fn5lbpPuXQs','DR.SPORTS']]],
+ [/Oleadas 3v2|Oleadas con centros|Centros? y remate/,[['Velocidad, centro y remate, y vuelta en 3x2','VuNLALRjOrg','Coaching fútbol'],['Transición 3x2 que pasa a 1x1','iDGJ_Ac4FEE','Coaching fútbol']]],
  [/6v6 con porteros|7v7 y partido 9v9|Ensayo/,[['Transiciones defensivas','oSvR4ZYd50E','José Luis Mejías']]],
  [/Salida de balón|Salida con presión|Salida 3\+P/,[['Salida de balón contra presión de 4','H2Hh_B4xSrE','misentrenamientosdefutbol'],['Salida de balón y presión','nud6jWl90jk','Fútbol Dinámico']]],
  [/franjas|tres zonas|3 zonas/,[['Partido aplicado: por dentro o por banda','CbACPEd8gHY','misentrenamientosdefutbol'],['Partido en 3 zonas con superioridad en el centro','Q3ZXxT76kYE','Coaching fútbol']]],
