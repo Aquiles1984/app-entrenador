@@ -344,7 +344,7 @@ header{background:linear-gradient(135deg,#1C3F94 0%,#16327A 60%,#C8102E 100%)!im
 </head>
 <body>
 <header>
-  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.86</span></h1>
+  <h1><button id="hback" data-act="back" aria-label="Atrás">‹</button>S14A · Entrenador <span class="ver">v3.87</span></h1>
   <p class="priv">Datos de menores: se guardan solo en este dispositivo. No subir este archivo ni las copias de seguridad a ningún servicio.</p>
 </header>
 <nav id="tabs"></nav>
@@ -3399,14 +3399,16 @@ function semanaDe(f){
   return {t:dm(lun)+' al '+dm(dom),fil:fil,qz:quincena(iso)};
 }
 function iniMin(f){var x=/^(\d+)\s*min/.exec(String(f.ini||''));return x?+x[1]:0;}
-function horarioDe(f){var m=20*60+iniMin(f),hh=function(x){return Math.floor(x/60)+':'+('0'+x%60).slice(-2);},r=f.tareas.map(function(t,k){var x=[hh(m),(k+1)+' · '+t.t,t.d];m+=parseMinT(t);return x;});if(f.fin)r.push([hh(m),/córner|falta|saque de banda|penalti/i.test(f.fin)?'Final: balón parado y vuelta a la calma':'Final: estiramientos y mensaje',finMin(f.fin)+"'"]);return r;}
+function iniPuntos(f){var P=String(f.ini||'').split(/\s+(?=\d\) )/),c=P.shift().replace(/^\s*\d+\s*min\.?\s*/,'').replace(/\.$/,'');return {d:c?c.charAt(0).toUpperCase()+c.slice(1):'',p:P.map(function(x){return x.replace(/^\d\) /,'').trim();})};}
+function horarioDe(f){var m=20*60+iniMin(f),hh=function(x){return Math.floor(x/60)+':'+('0'+x%60).slice(-2);},r=f.tareas.map(function(t,k){var x=[hh(m),(k+1)+' · '+t.t,t.d];m+=parseMinT(t);return x;});if(f.fin)r.push([hh(m),/córner|falta|saque de banda|penalti/i.test(f.fin)?'Final: balón parado y vuelta a la calma':'Final: vuelta a la calma y mensaje',finMin(f.fin)+"'"]);return r;}
 function pauTexto(i){
   var f=FICH[i];if(!f)return '';var w=semanaDe(f),hy=f.hoy;
   var t=tituloFicha(f)+'\n\n📅 SEMANA DEL '+w.t+(w.qz?'\nTrabajo de estas dos semanas: '+w.qz[1]:'')+'\n'+w.fil.map(function(r){return '- '+r[1]+' · '+r[2]+': '+r[3];}).join('\n')+'\n';
   t+='\n🎯 ENTRENO DEL '+f.di.toUpperCase()+' '+f.fe.slice(0,5)+' · 20:00 · '+f.ca+'\n'+f.ob+'\n';
   t+='\n🎒 MATERIAL:\n'+((SIMP[f.fe]||{}).mat||spMat(f)).map(function(x){return '☐ '+x;}).join('\n')+'\n';
   if(hy)t+='\n🗣️ Hoy trabajamos: '+hy.q+'\n¿Por qué? '+hy.p+'\nPalabra: '+hy.w+'\nPregunta al final: '+hy.f+'\n';
-  t+='\n⏱ Horario:\n'+horarioDe(f).map(function(r){return r[0]+' · '+r[1]+' ('+r[2]+')';}).join('\n');
+  var cm=iniMin(f),cp=iniPuntos(f);if(cm&&cp.p.length)t+='\n🗣️ Charla (20:00, '+cm+"')"+(cp.d?': '+cp.d:'')+'\n'+cp.p.map(function(x,k){return (k+1)+') '+x;}).join('\n')+'\n';
+  t+='\n⏱ Horario:\n'+(cm?"20:00 · Charla ("+cm+"')\n":'')+horarioDe(f).map(function(r){return r[0]+' · '+r[1]+' ('+r[2]+')';}).join('\n');
   return ayuTxt(t);
 }
 var FICHAPROP=false;
@@ -3435,7 +3437,8 @@ function vPauSimple(f){
    (hy?'<p><b>Hoy:</b> '+esc(hy.q)+'</p><p style="margin:0"><b>Palabra:</b> '+esc(hy.w)+'</p>':'<p><b>Hoy:</b> '+esc(f.ob)+'</p>')+'</div>';
   h+='<div class="card spmat"><h2>🎒 Material</h2><ul>'+(s0.mat||spMat(f)).map(li).join('')+'</ul></div>';
   h+='<div class="card"><h2>🧱 Al llegar, montamos todo</h2>'+(s0.svg?'<div style="margin:4px 0 6px">'+s0.svg+'</div>':'')+'<ol>'+(s0.mon||spMon(f)).map(li).join('')+'</ol></div>';
-  h+='<div class="card"><h2>⏱ Horario</h2><table>'+hr.map(function(r,k){var s=(s0.t||[])[k],nm=s&&f.tareas[k]&&s.of===f.tareas[k].t?(k+1)+' · '+s.n:r[1];return '<tr><td><b>'+r[0]+'</b></td><td>'+esc(nm)+'</td><td>'+esc(r[2])+'</td></tr>';}).join('')+'</table></div>';
+  var cm=iniMin(f),cp=iniPuntos(f);if(cm&&cp.p.length)h+='<div class="card"><h2>🗣️ Charla · 20:00 · '+cm+"'</h2>"+(cp.d?'<p class="note" style="margin:0">'+esc(cp.d)+'</p>':'')+'<ol>'+cp.p.map(li).join('')+'</ol></div>';
+  h+='<div class="card"><h2>⏱ Horario</h2><table>'+(cm?'<tr><td><b>20:00</b></td><td>Charla</td><td>'+cm+"'</td></tr>":'')+hr.map(function(r,k){var s=(s0.t||[])[k],nm=s&&f.tareas[k]&&s.of===f.tareas[k].t?(k+1)+' · '+s.n:r[1];return '<tr><td><b>'+r[0]+'</b></td><td>'+esc(nm)+'</td><td>'+esc(r[2])+'</td></tr>';}).join('')+'</table></div>';
   f.tareas.forEach(function(t,k){var s=(s0.t||[])[k];if(!s||s.of!==t.t)s={};
     h+='<div class="card"><h2>'+(hr[k]?hr[k][0]+' · ':'')+(k+1)+' · '+esc(s.n||t.t)+' · '+esc(t.d)+'</h2><div class="spt"><div>'+svgFig(t.fig)+'<p class="note">'+esc(s.es||t.es)+'</p></div><div><ul>'+(s.p||spPasos(t)).map(li).join('')+'</ul><p class="spk"><b>🔑 Clave:</b> '+esc(s.k||t.ob)+'</p>'+(s.v?'<p class="spk"><b>🗣️ Dilo así:</b> '+s.v.map(function(x){return '«'+esc(x)+'»';}).join(' · ')+'</p>':'')+'</div></div></div>';});
   if(f.fin)h+='<div class="card"><h2>'+hr[hr.length-1][0]+' · 🏁 Final · '+finMin(f.fin)+"'</h2><ul>"+(s0.fin||spFin(f.fin)).map(li).join('')+'</ul>'+(hy?'<p class="spk"><b>❓ Pregunta al final:</b> '+esc(hy.f)+'</p>':'')+'</div>';
